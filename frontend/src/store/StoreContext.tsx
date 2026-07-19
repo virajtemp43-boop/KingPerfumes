@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
+console.log("[StoreContext][init] VITE_API_URL =", import.meta.env.VITE_API_URL);
 const API_BASE = import.meta.env.VITE_API_URL || "/api";
+console.log("[StoreContext][init] API_BASE =", API_BASE);
 
 export type Product = {
   id: string;
@@ -137,56 +139,75 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const refreshProducts = async () => {
     try {
-      const r = await fetch(`${API_BASE}/products?limit=100`);
+      const url = `${API_BASE}/products?limit=100`;
+      console.log("[StoreContext][products] fetching", url);
+      const r = await fetch(url);
+      console.log("[StoreContext][products] status", r.status, r.statusText);
       const data = await r.json();
+      console.log("[StoreContext][products] data keys", Object.keys(data || {}), "count", Array.isArray(data?.products) ? data.products.length : "n/a");
       if (data.products) setProducts(data.products);
     } catch (e) {
-      console.warn("Backend not available");
+      console.warn("[StoreContext][products] fetch failed", e);
     }
   };
 
   const refreshOrders = async () => {
     try {
-      const r = await fetch(`${API_BASE}/orders`);
+      const url = `${API_BASE}/orders`;
+      console.log("[StoreContext][orders] fetching", url);
+      const r = await fetch(url);
+      console.log("[StoreContext][orders] status", r.status, r.statusText);
       const data = await r.json();
       if (Array.isArray(data)) setOrders(data);
     } catch (e) {
-      console.warn("Could not fetch orders");
+      console.warn("[StoreContext][orders] fetch failed", e);
     }
   };
 
   const refreshCategories = async () => {
     try {
-      const r = await fetch(`${API_BASE}/categories`);
+      const url = `${API_BASE}/categories`;
+      console.log("[StoreContext][categories] fetching", url);
+      const r = await fetch(url);
+      console.log("[StoreContext][categories] status", r.status, r.statusText);
       const data = await r.json();
+      console.log("[StoreContext][categories] data keys", Object.keys(data || {}), "count", Array.isArray(data) ? data.length : "n/a");
       if (Array.isArray(data)) setCategories(data);
     } catch (e) {
-      console.warn("Could not fetch categories");
+      console.warn("[StoreContext][categories] fetch failed", e);
     }
   };
 
   const refreshContactMessages = async () => {
     try {
-      const r = await fetch(`${API_BASE}/contact`);
+      const url = `${API_BASE}/contact`;
+      console.log("[StoreContext][contact] fetching", url);
+      const r = await fetch(url);
+      console.log("[StoreContext][contact] status", r.status, r.statusText);
       const data = await r.json();
       if (Array.isArray(data)) setContactMessages(data);
     } catch (e) {
-      console.warn("Could not fetch contact messages");
+      console.warn("[StoreContext][contact] fetch failed", e);
     }
   };
 
   const refreshSettings = async () => {
     try {
-      const r = await fetch(`${API_BASE}/settings`);
+      const url = `${API_BASE}/settings`;
+      console.log("[StoreContext][settings] fetching", url);
+      const r = await fetch(url);
+      console.log("[StoreContext][settings] status", r.status, r.statusText);
       const data = await r.json();
+      console.log("[StoreContext][settings] data keys", Object.keys(data || {}));
       if (data) setSettings(data);
     } catch (e) {
-      console.warn("Could not fetch settings");
+      console.warn("[StoreContext][settings] fetch failed", e);
     }
   };
 
   useEffect(() => { refreshProducts(); }, []);
   useEffect(() => { refreshCategories(); }, []);
+  useEffect(() => { console.log("[StoreContext][state] products=", products.length, "categories=", categories.length, "orders=", orders.length, "settingsKeys=", Object.keys(settings)); }, [products, categories, orders, settings]);
 
   const addProduct = async (p: Omit<Product, "id">) => {
     const r = await fetch(`${API_BASE}/products`, {
