@@ -4,7 +4,7 @@ import { Star, Heart, Minus, Plus, ShoppingBag, Crown, Truck, ShieldCheck } from
 import { useStore, formatPrice, API_BASE_URL } from "@/store/StoreContext";
 import { ProductCard } from "@/components/ProductCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-//----------------------------------------
+
 export const Route = createFileRoute("/product/$id")({
   component: ProductDetail,
   loader: async ({ params, context }) => {
