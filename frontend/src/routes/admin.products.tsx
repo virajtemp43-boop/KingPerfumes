@@ -56,7 +56,7 @@ function AdminProducts() {
         </button>
       </div>
 
-      <div className="mt-8 overflow-hidden rounded-2xl bg-card border border-border/40">
+      <div className="mt-8 overflow-x-auto rounded-2xl bg-card border border-border/40">
         <table className="w-full min-w-[720px] text-sm">
           <thead className="bg-secondary/60 text-xs uppercase tracking-wider text-muted-foreground">
             <tr>
@@ -259,7 +259,7 @@ function ProductForm({ initial, categories, onClose, onSubmit }: { initial: Form
 
           {/* Removed: Original Price field */}
           
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Stock" type="number" value={String(form.stock)} onChange={(v) => update("stock", +v)} />
             <label className="block">
               <span className="text-xs uppercase tracking-wider text-muted-foreground">Gender</span>
@@ -310,7 +310,7 @@ function ProductForm({ initial, categories, onClose, onSubmit }: { initial: Form
 
           <TextArea label="Description" value={form.description} onChange={(v) => update("description", v)} />
           <Field label="Notes (comma separated)" value={form.notes} onChange={(v) => update("notes", v)} />
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Field label="Top Notes" value={form.topNotes} onChange={(v) => update("topNotes", v)} />
             <Field label="Heart Notes" value={form.middleNotes} onChange={(v) => update("middleNotes", v)} />
             <Field label="Base Notes" value={form.baseNotes} onChange={(v) => update("baseNotes", v)} />
@@ -360,7 +360,7 @@ function ProductForm({ initial, categories, onClose, onSubmit }: { initial: Form
           {/* URL images */}
           <Field label="Or enter image URLs (comma separated)" value={form.images.join(", ")} onChange={(v) => update("images", v.split(",").map((s) => s.trim()).filter(Boolean))} />
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <label className="block">
               <span className="text-xs uppercase tracking-wider text-muted-foreground">Badge</span>
               <select value={form.badge ?? ""} onChange={(e) => update("badge", (e.target.value || undefined) as FormState["badge"])} className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground">
