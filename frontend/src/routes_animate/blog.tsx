@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Reveal } from "@/components/Reveal";
 
 export const Route = createFileRoute("/blog")({
   head: () => ({
@@ -24,23 +25,25 @@ const posts = [
 function Blog() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-16 md:px-6">
-      <header className="text-center">
+      <Reveal className="text-center">
         <span className="text-xs uppercase tracking-[0.3em] text-sage">Journal</span>
         <h1 className="mt-3 font-serif text-5xl md:text-6xl">Stories from the garden</h1>
-      </header>
+      </Reveal>
 
       <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-        {posts.map((p) => (
-          <article key={p.title} className="group cursor-pointer">
-            <div className="overflow-hidden rounded-2xl">
-              <img src={p.img} alt={p.title} className="aspect-[4/3] w-full object-cover transition-transform duration-700 group-hover:scale-105" />
-            </div>
-            <div className="mt-5">
-              <span className="text-xs uppercase tracking-wider text-sage">{p.tag}</span>
-              <h3 className="mt-2 font-serif text-2xl leading-tight group-hover:text-terracotta">{p.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{p.excerpt}</p>
-            </div>
-          </article>
+        {posts.map((p, i) => (
+          <Reveal key={p.title} delay={i * 80}>
+            <article className="group hover-lift cursor-pointer">
+              <div className="overflow-hidden rounded-2xl">
+                <img src={p.img} alt={p.title} className="aspect-[4/3] w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              </div>
+              <div className="mt-5">
+                <span className="text-xs uppercase tracking-wider text-sage">{p.tag}</span>
+                <h3 className="mt-2 font-serif text-2xl leading-tight group-hover:text-terracotta transition-colors">{p.title}</h3>
+                <p className="mt-2 text-sm text-muted-foreground">{p.excerpt}</p>
+              </div>
+            </article>
+          </Reveal>
         ))}
       </div>
     </div>

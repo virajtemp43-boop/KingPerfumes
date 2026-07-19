@@ -32,12 +32,18 @@ export function SiteHeader() {
   return (
     <>
       <div className="sticky top-0 z-40">
-        {/* Announcement bar */}
+        {/* Announcement bar — continuous marquee ticker */}
         <div className="bg-primary text-primary-foreground text-xs">
-          <div className="mx-auto max-w-7xl overflow-hidden px-4 py-2 text-center">
-            <span className="inline-block animate-fade-in-up tracking-wide">
-              🚚 Free shipping on orders over ₹999 | Shop luxury fragrances
-            </span>
+          <div className="marquee-viewport py-2">
+            <div className="marquee-track gap-16 pr-16">
+              {Array.from({ length: 2 }).map((_, row) => (
+                <div key={row} className="flex shrink-0 items-center gap-16 pl-16" aria-hidden={row === 1}>
+                  {["🚚 Free shipping on orders over ₹999", "👑 Shop luxury fragrances", "✨ New Royal Oud collection just dropped", "🎁 Members save 10% today"].map((msg) => (
+                    <span key={msg} className="tracking-wide whitespace-nowrap">{msg}</span>
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -59,8 +65,8 @@ export function SiteHeader() {
                 <Link
                   key={n.to}
                   to={n.to}
-                  className="text-sm text-foreground/80 transition-colors hover:text-gold"
-                  activeProps={{ className: "text-gold font-medium" }}
+                  className="underline-grow text-sm text-foreground/80 transition-colors hover:text-gold"
+                  activeProps={{ className: "underline-grow is-active text-gold font-medium" }}
                   activeOptions={{ exact: n.to === "/" }}
                 >
                   {n.label}
@@ -122,7 +128,7 @@ export function SiteHeader() {
 
 function Badge({ n }: { n: number }) {
   return (
-    <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-gold px-1 text-[10px] font-medium text-gold-foreground">
+    <span className="text-pop-in absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-gold px-1 text-[10px] font-medium text-gold-foreground">
       {n > 99 ? "99+" : n}
     </span>
   );

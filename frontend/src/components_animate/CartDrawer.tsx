@@ -22,7 +22,7 @@ export function CartDrawer() {
 
   return (
     <>
-      {cartOpen && <div className="fixed inset-0 z-50 bg-black/60" onClick={() => setCartOpen(false)} />}
+      {cartOpen && <div className="animate-fade-in fixed inset-0 z-50 bg-black/60" onClick={() => setCartOpen(false)} />}
       <div className={`fixed right-0 top-0 z-50 h-full w-full max-w-md bg-background shadow-2xl transition-transform duration-300 ${cartOpen ? "translate-x-0" : "translate-x-full"}`}>
         <div className="flex h-full flex-col">
           <div className="flex items-center justify-between border-b border-border/60 px-6 py-4">
@@ -47,8 +47,12 @@ export function CartDrawer() {
             <>
               <div className="flex-1 overflow-y-auto px-6 py-4">
                 <ul className="space-y-4">
-                  {items.map((i: any) => (
-                    <li key={i.productId + i.size} className="flex gap-4 rounded-xl bg-card border border-border/40 p-3">
+                  {items.map((i: any, idx: number) => (
+                    <li
+                      key={i.productId + i.size}
+                      style={{ "--stagger-i": idx } as any}
+                      className="stagger-in hover-lift flex gap-4 rounded-xl bg-card border border-border/40 p-3 transition-colors hover:border-gold/30"
+                    >
                       <img src={i.product.images[0]} alt="" className="h-20 w-16 rounded-lg object-cover" />
                       <div className="flex-1 min-w-0">
                         <a href={`/product/${i.productId}`} onClick={() => setCartOpen(false)} className="font-serif text-base text-primary hover:text-gold line-clamp-1">
@@ -81,9 +85,10 @@ export function CartDrawer() {
                 <Link
                   to="/checkout"
                   onClick={() => setCartOpen(false)}
-                  className="flex w-full items-center justify-center gap-2 rounded-full bg-gold py-3.5 text-sm font-medium text-gold-foreground hover:opacity-90 transition-all"
+                  className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-gold py-3.5 text-sm font-medium text-gold-foreground hover:opacity-90 transition-all"
                 >
-                  Checkout · {formatPrice(subtotal)}
+                  <span className="shine-sweep pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-white/30" />
+                  <span className="relative z-10">Checkout · {formatPrice(subtotal)}</span>
                 </Link>
               </div>
             </>
