@@ -97,8 +97,6 @@ function RootComponent() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isAdmin = pathname.startsWith("/admin");
 
-  console.log("[root][mount] pathname=", pathname, "isAdmin=", isAdmin);
-
   return (
     <QueryClientProvider client={queryClient}>
       <StoreProvider>
@@ -107,7 +105,7 @@ function RootComponent() {
         ) : (
           <div className="flex min-h-screen flex-col">
             <SiteHeader />
-            <main className="flex-1">
+            <main key={pathname} className="page-transition flex-1">
               <Outlet />
             </main>
             <SiteFooter />

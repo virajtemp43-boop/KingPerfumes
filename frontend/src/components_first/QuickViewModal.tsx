@@ -27,15 +27,13 @@ export function QuickViewModal() {
 
   return (
     <div className="fixed inset-0 z-50">
-      <div className="animate-fade-in absolute inset-0 bg-black/50" onClick={() => setQuickViewId(null)} />
-      <div className="modal-pop-in absolute left-1/2 top-1/2 w-[94%] max-w-3xl overflow-hidden rounded-2xl bg-background shadow-2xl">
-        <button onClick={() => setQuickViewId(null)} className="absolute right-3 top-3 z-10 grid h-8 w-8 place-items-center rounded-full bg-background/80 transition-transform hover:scale-110 hover:text-gold">
+      <div className="absolute inset-0 bg-black/50" onClick={() => setQuickViewId(null)} />
+      <div className="absolute left-1/2 top-1/2 w-[94%] max-w-3xl -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl bg-background shadow-2xl">
+        <button onClick={() => setQuickViewId(null)} className="absolute right-3 top-3 z-10 grid h-8 w-8 place-items-center rounded-full bg-background/80">
           <X className="h-4 w-4" />
         </button>
         <div className="grid md:grid-cols-2">
-          <div className="relative overflow-hidden">
-            <img src={product.images?.[0] || ""} alt={product.name} className="h-full max-h-[70vh] w-full object-cover transition-transform duration-700 hover:scale-105" />
-          </div>
+          <img src={product.images?.[0] || ""} alt={product.name} className="h-full max-h-[70vh] w-full object-cover" />
           <div className="flex flex-col gap-4 p-6">
             <div>
               <div className="text-xs uppercase tracking-wider text-gold/70">{product.category}</div>
@@ -55,7 +53,7 @@ export function QuickViewModal() {
                     <button
                       key={s.size}
                       onClick={() => setSize(s.size)}
-                      className={`rounded-full border px-3 py-1.5 text-sm transition-all duration-200 ${currentSize === s.size ? "border-gold bg-gold text-gold-foreground scale-105" : "border-border text-foreground hover:border-gold/50"}`}
+                      className={`rounded-full border px-3 py-1.5 text-sm ${currentSize === s.size ? "border-gold bg-gold text-gold-foreground" : "border-border text-foreground"}`}
                     >
                       {s.size} — {formatPrice(s.price)}
                     </button>
@@ -72,10 +70,9 @@ export function QuickViewModal() {
               </div>
               <button
                 onClick={() => { addToCart(product.id, currentSize, qty); setQuickViewId(null); setCartOpen(true); }}
-                className="group relative inline-flex flex-1 items-center justify-center gap-2 overflow-hidden rounded-full bg-gold px-5 py-3 text-sm font-medium text-gold-foreground hover:opacity-90 transition-all"
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-gold px-5 py-3 text-sm font-medium text-gold-foreground hover:opacity-90"
               >
-                <span className="shine-sweep pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-white/30" />
-                <span className="relative z-10 flex items-center gap-2"><ShoppingBag className="h-4 w-4" /> Add to Cart</span>
+                <ShoppingBag className="h-4 w-4" /> Add to Cart
               </button>
             </div>
             <Link to="/product/$id" params={{ id: product.id }} onClick={() => setQuickViewId(null)} className="text-center text-sm text-gold underline underline-offset-4">
