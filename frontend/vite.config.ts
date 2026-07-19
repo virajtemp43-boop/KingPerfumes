@@ -16,4 +16,12 @@ export default defineConfig({
   define: {
     "import.meta.env.VITE_API_URL": JSON.stringify(process.env.VITE_API_URL || ""),
   },
+  plugins: [
+    {
+      name: "debug-env",
+      buildStart() {
+        console.log("[vite][build] VITE_API_URL from process.env =", process.env.VITE_API_URL ?? "<missing>");
+      },
+    },
+  ],
 });

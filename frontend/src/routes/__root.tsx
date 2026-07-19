@@ -97,6 +97,8 @@ function RootComponent() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isAdmin = pathname.startsWith("/admin");
 
+  console.log("[root][mount] pathname=", pathname, "isAdmin=", isAdmin);
+
   return (
     <QueryClientProvider client={queryClient}>
       <StoreProvider>

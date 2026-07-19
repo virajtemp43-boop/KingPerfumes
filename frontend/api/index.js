@@ -20,6 +20,11 @@ if (RAZORPAY_KEY_SECRET) {
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: "50mb" }));
 
+app.use((req, res, next) => {
+  console.log("[api][middleware] incoming", req.method, req.url);
+  next();
+});
+
 // Serve uploaded files from the Vercel /tmp volume (ephemeral, single-instance).
 // In production prefer Vercel Blob / a CDN; this keeps admin uploads working in-session.
 app.use("/api/uploads", express.static("/tmp"));
@@ -47,6 +52,7 @@ const upload = multer({
 // ==================== PRODUCTS API ====================
 
 app.get("/api/products", async (req, res) => {
+  console.log("[api][products] incoming", req.method, req.url);
   try {
     const { category, gender, minPrice, maxPrice, search, sort = "popular", page = "1", limit = "50" } = req.query;
 
@@ -177,6 +183,7 @@ app.post("/api/upload/multiple", upload.array("images", 10), (req, res) => {
 // ==================== CATEGORIES API ====================
 
 app.get("/api/categories", async (req, res) => {
+  console.log("[api][categories] incoming", req.method, req.url);
   try {
     const dbCategories = await queryAll("SELECT * FROM categories ORDER BY name ASC");
     const dbNames = new Set(dbCategories.map((c) => c.name));
@@ -308,6 +315,7 @@ app.delete("/api/contact/:id", async (req, res) => {
 // ==================== SETTINGS API ====================
 
 app.get("/api/settings", async (req, res) => {
+  console.log("[api][settings] incoming", req.method, req.url);
   try {
     const settings = await queryAll("SELECT * FROM settings");
     const result = {};
@@ -338,6 +346,7 @@ app.put("/api/settings", async (req, res) => {
 // ==================== ORDERS API ====================
 
 app.get("/api/orders", async (req, res) => {
+  console.log("[api][orders] incoming", req.method, req.url);
   try {
     const rows = await queryAll("SELECT * FROM orders ORDER BY created_at DESC");
     for (const order of rows) {
