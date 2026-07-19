@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import { Star, Heart, Minus, Plus, ShoppingBag, Crown, Truck, ShieldCheck } from "lucide-react";
-import { useStore, formatPrice } from "@/store/StoreContext";
+import { useStore, formatPrice, API_BASE_URL } from "@/store/StoreContext";
 import { ProductCard } from "@/components/ProductCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -10,7 +10,7 @@ export const Route = createFileRoute("/product/$id")({
   loader: async ({ params, context }) => {
     // Fetch product data
     try {
-      const res = await fetch(`/api/products/${params.id}`);
+      const res = await fetch(`${API_BASE_URL}/products/${params.id}`);
       if (res.ok) {
         const data = await res.json();
         return { product: data };
