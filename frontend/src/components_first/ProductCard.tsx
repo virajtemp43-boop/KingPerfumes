@@ -38,16 +38,16 @@ export function ProductCard({ product }: { product: Product }) {
       <div className="absolute right-3 top-3 z-10 flex flex-col gap-2">
         <button
           onClick={() => toggleWishlist(product.id)}
-          className="grid h-8 w-8 place-items-center rounded-full bg-background/80 backdrop-blur opacity-100 transition-all duration-300 md:opacity-0 md:group-hover:opacity-100 hover:scale-110 hover:bg-gold hover:text-gold-foreground"
+          className="grid h-8 w-8 place-items-center rounded-full bg-background/80 backdrop-blur opacity-100 transition-all md:opacity-0 md:group-hover:opacity-100 hover:bg-gold hover:text-gold-foreground"
         >
-          <Heart className={`h-4 w-4 transition-transform ${inWishlist ? "fill-gold text-gold scale-110" : ""}`} />
+          <Heart className={`h-4 w-4 ${inWishlist ? "fill-gold text-gold" : ""}`} />
         </button>
         <button
           onClick={() => toggleCompare(product.id)}
-          className="grid h-8 w-8 place-items-center rounded-full bg-background/80 backdrop-blur opacity-100 transition-all duration-300 md:opacity-0 md:group-hover:opacity-100 hover:scale-110 hover:bg-gold hover:text-gold-foreground"
+          className="grid h-8 w-8 place-items-center rounded-full bg-background/80 backdrop-blur opacity-100 transition-all md:opacity-0 md:group-hover:opacity-100 hover:bg-gold hover:text-gold-foreground"
           title={inCompare ? "Remove from Compare" : "Add to Compare"}
         >
-          <GitCompare className={`h-4 w-4 transition-transform ${inCompare ? "text-gold scale-110" : ""}`} />
+          <GitCompare className={`h-4 w-4 ${inCompare ? "text-gold" : ""}`} />
         </button>
       </div>
 
@@ -67,7 +67,7 @@ export function ProductCard({ product }: { product: Product }) {
           />
         )}
         {/* Quick view overlay */}
-        <div className="absolute inset-0 flex items-end justify-center pb-4 opacity-100 translate-y-0 transition-all duration-300 md:opacity-0 md:translate-y-2 md:group-hover:opacity-100 md:group-hover:translate-y-0">
+        <div className="absolute inset-0 flex items-end justify-center pb-4 opacity-100 transition-all md:opacity-0 md:group-hover:opacity-100">
           <button
             onClick={(e) => { e.preventDefault(); setQuickViewId(product.id); }}
             className="flex items-center gap-2 rounded-full bg-background/90 backdrop-blur px-4 py-2 text-xs font-medium text-foreground shadow-lg hover:bg-gold hover:text-gold-foreground transition-all"
@@ -116,10 +116,9 @@ export function ProductCard({ product }: { product: Product }) {
         {/* Add to cart */}
         <button
           onClick={() => addToCart(product.id)}
-          className="group/btn relative mt-3 flex w-full items-center justify-center gap-2 overflow-hidden rounded-lg border border-gold/30 py-2.5 text-sm font-medium text-gold transition-all hover:bg-gold hover:text-gold-foreground"
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-gold/30 py-2.5 text-sm font-medium text-gold transition-all hover:bg-gold hover:text-gold-foreground"
         >
-          <span className="shine-sweep pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gold/20 opacity-0 group-hover/btn:opacity-100" />
-          <ShoppingBag className="h-4 w-4 relative z-10" /> <span className="relative z-10">Add to Cart</span>
+          <ShoppingBag className="h-4 w-4" /> Add to Cart
         </button>
       </div>
     </div>

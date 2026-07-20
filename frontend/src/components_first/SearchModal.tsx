@@ -19,8 +19,8 @@ export function SearchModal() {
 
   return (
     <div className="fixed inset-0 z-50">
-      <div className="animate-fade-in absolute inset-0 bg-black/50" onClick={() => setSearchOpen(false)} />
-      <div className="search-pop-in absolute left-1/2 top-16 w-[92%] max-w-2xl rounded-2xl bg-background shadow-2xl">
+      <div className="absolute inset-0 bg-black/50" onClick={() => setSearchOpen(false)} />
+      <div className="absolute left-1/2 top-16 w-[92%] max-w-2xl -translate-x-1/2 rounded-2xl bg-background shadow-2xl">
         <div className="flex items-center gap-3 border-b border-border p-4">
           <Search className="h-5 w-5 text-muted-foreground" />
           <input
@@ -39,7 +39,7 @@ export function SearchModal() {
               <div className="text-xs uppercase tracking-wider text-muted-foreground">Popular searches</div>
               <div className="mt-3 flex flex-wrap gap-2">
                 {popular.map((t) => (
-                  <button key={t} onClick={() => setQ(t)} className="rounded-full bg-secondary px-3 py-1.5 text-sm transition-all hover:-translate-y-0.5 hover:bg-gold hover:text-gold-foreground">{t}</button>
+                  <button key={t} onClick={() => setQ(t)} className="rounded-full bg-secondary px-3 py-1.5 text-sm hover:bg-sand">{t}</button>
                 ))}
               </div>
             </>
@@ -51,13 +51,11 @@ export function SearchModal() {
 
           {results.length > 0 && (
             <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {results.map((p, idx) => (
-                <li key={p.id} style={{ "--stagger-i": idx } as any} className="stagger-in">
-                  <Link to="/product/$id" params={{ id: p.id }} onClick={() => setSearchOpen(false)} className="group block">
-                    <div className="overflow-hidden rounded-lg">
-                      <img src={p.images[0]} alt={p.name} className="aspect-square w-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                    </div>
-                    <div className="mt-2 line-clamp-1 text-sm transition-colors group-hover:text-gold">{p.name}</div>
+              {results.map((p) => (
+                <li key={p.id}>
+                  <Link to="/product/$id" params={{ id: p.id }} onClick={() => setSearchOpen(false)} className="block">
+                    <img src={p.images[0]} alt={p.name} className="aspect-square w-full rounded-lg object-cover" />
+                    <div className="mt-2 line-clamp-1 text-sm">{p.name}</div>
                     <div className="text-xs text-muted-foreground">{formatPrice(p.price)}</div>
                   </Link>
                 </li>

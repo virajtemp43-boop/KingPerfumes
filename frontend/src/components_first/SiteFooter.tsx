@@ -17,7 +17,7 @@ export function SiteFooter() {
             </p>
             <div className="mt-6 flex gap-3">
               {[Instagram, Facebook, Twitter, Youtube].map((Icon, i) => (
-                <a key={i} href="#" className="grid h-9 w-9 place-items-center rounded-full border border-border text-muted-foreground transition-all duration-300 hover:-translate-y-1 hover:border-gold hover:text-gold">
+                <a key={i} href="#" className="grid h-9 w-9 place-items-center rounded-full border border-border text-muted-foreground hover:border-gold hover:text-gold transition-colors">
                   <Icon className="h-4 w-4" />
                 </a>
               ))}

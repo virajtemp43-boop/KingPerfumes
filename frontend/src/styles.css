@@ -40,40 +40,40 @@
 }
 
 :root {
-  --radius: 1.25rem;
-  /* Organic Essence palette — light, botanical, plant-based */
-  --background: oklch(0.97 0.015 95);              /* #f7f3ea warm cream */
-  --foreground: oklch(0.27 0.02 130);               /* #33392a deep moss/charcoal */
-  --card: oklch(0.995 0.006 95);                    /* #fffdf8 soft white */
-  --card-foreground: oklch(0.27 0.02 130);
-  --popover: oklch(0.995 0.006 95);
-  --popover-foreground: oklch(0.27 0.02 130);
+  --radius: 1rem;
+  /* Premium palette — obsidian black, warm gold, deep emerald */
+  --background: oklch(0.09 0.005 60);              /* #0d0c0b near-black */
+  --foreground: oklch(0.93 0.012 85);              /* #ece5d6 warm ivory */
+  --card: oklch(0.14 0.008 60);                    /* #201e1a espresso black */
+  --card-foreground: oklch(0.93 0.012 85);
+  --popover: oklch(0.14 0.008 60);
+  --popover-foreground: oklch(0.93 0.012 85);
 
-  /* primary = sage green, the "organic essence" hero color */
-  --primary: oklch(0.52 0.075 145);                 /* #5c7a52 sage green */
-  --primary-foreground: oklch(0.98 0.01 95);        /* cream */
+  /* primary = rich gold */
+  --primary: oklch(0.78 0.14 85);                  /* #d4af37 gold */
+  --primary-foreground: oklch(0.12 0.008 60);      /* near black */
 
-  /* secondary = pale sage */
-  --secondary: oklch(0.94 0.025 130);                /* #e7ecdd pale sage */
-  --secondary-foreground: oklch(0.32 0.03 135);
-  --muted: oklch(0.94 0.015 90);                     /* #efe9dd soft sand */
-  --muted-foreground: oklch(0.52 0.025 110);
-  --accent: oklch(0.90 0.03 100);                    /* #e4dcc4 light botanical tan */
-  --accent-foreground: oklch(0.30 0.03 130);
+  /* secondary = deep emerald surface */
+  --secondary: oklch(0.20 0.035 155);              /* #16261f bottle green */
+  --secondary-foreground: oklch(0.90 0.02 90);
+  --muted: oklch(0.17 0.008 60);
+  --muted-foreground: oklch(0.62 0.02 80);
+  --accent: oklch(0.24 0.05 155);                  /* deeper emerald accent */
+  --accent-foreground: oklch(0.92 0.02 90);
 
-  /* gold token repurposed as the organic "sage" brand accent, used across components */
-  --gold: oklch(0.52 0.075 145);                     /* sage green, replaces warm gold */
-  --gold-foreground: oklch(0.98 0.01 95);
+  /* gold token — the brand's primary metallic accent, used across components */
+  --gold: oklch(0.78 0.14 85);                     /* #d4af37 gold */
+  --gold-foreground: oklch(0.12 0.008 60);
 
-  /* burgundy token repurposed as warm terracotta accent */
-  --burgundy: oklch(0.60 0.11 45);                   /* #b06a3f terracotta clay */
-  --burgundy-foreground: oklch(0.98 0.01 95);
+  /* burgundy token repurposed as the premium emerald green accent */
+  --burgundy: oklch(0.42 0.09 155);                /* #2f5c46 emerald */
+  --burgundy-foreground: oklch(0.96 0.015 90);
 
   --destructive: oklch(0.55 0.20 25);
   --destructive-foreground: oklch(0.98 0.01 85);
-  --border: oklch(0.89 0.015 95);                    /* #e4ddcd soft sand hairline */
-  --input: oklch(0.89 0.015 95);
-  --ring: oklch(0.52 0.075 145);
+  --border: oklch(0.27 0.02 75);                   /* soft gold-tinted hairline */
+  --input: oklch(0.27 0.02 75);
+  --ring: oklch(0.78 0.14 85);
 }
 
 @layer base {
@@ -117,8 +117,8 @@
   50% { transform: translateY(-10px); }
 }
 @keyframes glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(92, 122, 82, 0.18); }
-  50% { box-shadow: 0 0 40px rgba(92, 122, 82, 0.32); }
+  0%, 100% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.20); }
+  50% { box-shadow: 0 0 40px rgba(212, 175, 55, 0.38); }
 }
 
 @utility animate-fade-in-up {
@@ -128,7 +128,7 @@
   animation: fade-in 0.5s ease-out both;
 }
 @utility animate-shimmer {
-  background: linear-gradient(90deg, transparent, rgba(92,122,82,0.08), transparent);
+  background: linear-gradient(90deg, transparent, rgba(212,175,55,0.10), transparent);
   background-size: 200% 100%;
   animation: shimmer 3s infinite;
 }
@@ -155,6 +155,147 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Marquee ticker: wrap two identical tracks side by side, animate the pair left */
+@utility marquee-viewport {
+  overflow: hidden;
+  width: 100%;
+}
+@utility marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 22s linear infinite;
+  will-change: transform;
+}
+@utility marquee-track-slow {
+  display: flex;
+  width: max-content;
+  animation: marquee 40s linear infinite;
+  will-change: transform;
+}
+
+/* Lift + shadow on hover, for cards and tiles */
+@utility hover-lift {
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+  &:hover {
+    transform: translateY(-6px);
+  }
+}
+
+/* Animated underline that grows from center on hover/active */
+@utility underline-grow {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -2px;
+    height: 1px;
+    width: 0%;
+    background: var(--gold);
+    transition: width 0.3s ease, left 0.3s ease;
+  }
+  &:hover::after,
+  &.is-active::after {
+    width: 100%;
+    left: 0%;
+  }
+}
+
+/* Two stacked images that crossfade on hover (product cards) */
+@utility img-crossfade-base {
+  transition: opacity 0.6s ease, transform 0.7s ease;
+}
+@utility img-crossfade-top {
+  transition: opacity 0.6s ease, transform 0.7s ease;
+  opacity: 0;
+  position: absolute;
+  inset: 0;
+}
+.group:hover .img-crossfade-base {
+  opacity: 0;
+}
+.group:hover .img-crossfade-top {
+  opacity: 1;
+  transform: scale(1.08);
+}
+
+/* Staggered entrance for lists of elements, set --stagger-i per child */
+@utility stagger-in {
+  opacity: 0;
+  animation: fade-in-up 0.6s ease-out both;
+  animation-delay: calc(var(--stagger-i, 0) * 90ms);
+}
+
+/* Route/page transition wrapper */
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@utility page-transition {
+  animation: page-in 0.45s ease-out both;
+}
+
+/* Gentle continuous shimmer sweep for hero/CTA highlights */
+@keyframes text-pop {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@utility text-pop-in {
+  opacity: 0;
+  animation: text-pop 0.7s ease-out both;
+}
+
+/* Cinematic hero background — video/aurora layer effects */
+@keyframes aurora-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(5%, -7%) scale(1.15); }
+  66% { transform: translate(-6%, 5%) scale(0.92); }
+}
+@utility aurora-blob {
+  animation: aurora-drift 20s ease-in-out infinite;
+  filter: blur(90px);
+}
+
+@keyframes sparkle-twinkle {
+  0%, 100% { opacity: 0; transform: scale(0.5); }
+  50% { opacity: 1; transform: scale(1); }
+}
+@utility sparkle-dot {
+  animation: sparkle-twinkle 3s ease-in-out infinite;
+}
+
+@keyframes shine-sweep {
+  0% { transform: translateX(-130%) skewX(-12deg); }
+  100% { transform: translateX(230%) skewX(-12deg); }
+}
+@utility shine-sweep {
+  animation: shine-sweep 3.2s ease-in-out infinite;
+}
+
+@utility hero-vignette {
+  background:
+    radial-gradient(ellipse at center, transparent 35%, var(--background) 100%),
+    linear-gradient(to right, var(--background) 0%, transparent 35%, transparent 65%, var(--background) 100%);
+}
+
+/* Modal entrance: fade + gentle scale-up */
+@keyframes modal-pop {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.94); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+@utility modal-pop-in {
+  animation: modal-pop 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Search panel: anchored to top, slides down + fades in */
+@keyframes search-pop {
+  from { opacity: 0; transform: translate(-50%, -12px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+@utility search-pop-in {
+  animation: search-pop 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* Scrollbar styling */
