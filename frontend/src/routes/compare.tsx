@@ -12,10 +12,10 @@ function Compare() {
   const items = products.filter((p) => compare.includes(p.id));
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-16 md:px-6">
+    <div className="mx-auto max-w-7xl px-4 pt-32 pb-16 md:px-6">
       <header className="text-center">
         <span className="text-xs uppercase tracking-[0.3em] text-gold/70">Side by side</span>
-        <h1 className="mt-3 font-serif text-4xl sm:text-5xl text-primary">Compare Products</h1>
+        <h1 className="mt-3 font-serif text-5xl text-primary">Compare Products</h1>
       </header>
 
       {items.length === 0 ? (

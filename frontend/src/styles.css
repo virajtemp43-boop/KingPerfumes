@@ -25,55 +25,50 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-ring-offset-background: var(--background);
   --color-gold: var(--gold);
   --color-gold-foreground: var(--gold-foreground);
   --color-burgundy: var(--burgundy);
   --color-burgundy-foreground: var(--burgundy-foreground);
-  --font-serif: "Cormorant Garamond", "Playfair Display", Georgia, serif;
-  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Instrument Serif", "Fraunces", "Cormorant Garamond", "Playfair Display", Georgia, serif;
+  --font-sans: "Geist", "Poppins", ui-sans-serif, system-ui, sans-serif;
 }
 
 :root {
-  --radius: 1rem;
-  /* Premium palette — obsidian black, warm gold, deep emerald */
-  --background: oklch(0.09 0.005 60);              /* #0d0c0b near-black */
-  --foreground: oklch(0.93 0.012 85);              /* #ece5d6 warm ivory */
-  --card: oklch(0.14 0.008 60);                    /* #201e1a espresso black */
-  --card-foreground: oklch(0.93 0.012 85);
-  --popover: oklch(0.14 0.008 60);
-  --popover-foreground: oklch(0.93 0.012 85);
+  --radius: 1.5rem;
+  /* Premium minimalist palette — Pure White, Soft Cream, Moss Green */
+  --background: #FFFFFF;
+  --foreground: #111111;
+  
+  --card: #F8F8F6;
+  --card-foreground: #111111;
+  
+  --popover: #FFFFFF;
+  --popover-foreground: #111111;
 
-  /* primary = rich gold */
-  --primary: oklch(0.78 0.14 85);                  /* #d4af37 gold */
-  --primary-foreground: oklch(0.12 0.008 60);      /* near black */
+  --primary: #29382C; /* Dark moss green */
+  --primary-foreground: #FFFFFF;
 
-  /* secondary = deep emerald surface */
-  --secondary: oklch(0.20 0.035 155);              /* #16261f bottle green */
-  --secondary-foreground: oklch(0.90 0.02 90);
-  --muted: oklch(0.17 0.008 60);
-  --muted-foreground: oklch(0.62 0.02 80);
-  --accent: oklch(0.24 0.05 155);                  /* deeper emerald accent */
-  --accent-foreground: oklch(0.92 0.02 90);
+  --secondary: #F8F8F6;
+  --secondary-foreground: #666666;
+  
+  --muted: #F8F8F6;
+  --muted-foreground: #888888;
+  
+  --accent: #E8EBE9; 
+  --accent-foreground: #29382C;
 
-  /* gold token — the brand's primary metallic accent, used across components */
-  --gold: oklch(0.78 0.14 85);                     /* #d4af37 gold */
-  --gold-foreground: oklch(0.12 0.008 60);
+  --gold: #C8A96A; /* Soft elegant gold */
+  --gold-foreground: #FFFFFF;
 
-  /* burgundy token repurposed as the premium emerald green accent */
-  --burgundy: oklch(0.42 0.09 155);                /* #2f5c46 emerald */
-  --burgundy-foreground: oklch(0.96 0.015 90);
+  --burgundy: #405545; /* Re-purposed as a lighter moss */
+  --burgundy-foreground: #FFFFFF;
 
-  --destructive: oklch(0.55 0.20 25);
-  --destructive-foreground: oklch(0.98 0.01 85);
-  --border: oklch(0.27 0.02 75);                   /* soft gold-tinted hairline */
-  --input: oklch(0.27 0.02 75);
-  --ring: oklch(0.78 0.14 85);
+  --border: #ECECEC;
+  --input: #ECECEC;
+  --ring: #C8A96A;
 }
 
 @layer base {
@@ -81,8 +76,6 @@
     border-color: var(--color-border);
   }
   html, body {
-    overflow-x: hidden;
-    max-width: 100vw;
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
@@ -91,8 +84,8 @@
   }
   h1, h2, h3, h4, h5 {
     font-family: var(--font-serif);
-    font-weight: 600;
-    letter-spacing: -0.01em;
+    font-weight: 500;
+    letter-spacing: -0.02em;
   }
   ::selection {
     background-color: var(--gold);
@@ -100,212 +93,40 @@
   }
 }
 
+/* Animations */
 @keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@utility animate-fade-in-up { animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+@keyframes text-pop {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
-@keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-@keyframes glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.20); }
-  50% { box-shadow: 0 0 40px rgba(212, 175, 55, 0.38); }
-}
+@utility text-pop-in { opacity: 0; animation: text-pop 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; }
 
-@utility animate-fade-in-up {
-  animation: fade-in-up 0.7s ease-out both;
-}
-@utility animate-fade-in {
-  animation: fade-in 0.5s ease-out both;
-}
-@utility animate-shimmer {
-  background: linear-gradient(90deg, transparent, rgba(212,175,55,0.10), transparent);
-  background-size: 200% 100%;
-  animation: shimmer 3s infinite;
-}
-@utility animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-@utility animate-glow {
-  animation: glow 3s ease-in-out infinite;
-}
-@utility animate-marquee {
-  animation: marquee 30s linear infinite;
-}
-
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-
-@utility reveal {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
-  &.is-visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Marquee ticker: wrap two identical tracks side by side, animate the pair left */
-@utility marquee-viewport {
-  overflow: hidden;
-  width: 100%;
-}
-@utility marquee-track {
-  display: flex;
-  width: max-content;
-  animation: marquee 22s linear infinite;
-  will-change: transform;
-}
-@utility marquee-track-slow {
-  display: flex;
-  width: max-content;
-  animation: marquee 40s linear infinite;
-  will-change: transform;
-}
-
-/* Lift + shadow on hover, for cards and tiles */
 @utility hover-lift {
-  transition: transform 0.35s ease, box-shadow 0.35s ease;
-  &:hover {
-    transform: translateY(-6px);
-  }
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  &:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.06); }
 }
 
-/* Animated underline that grows from center on hover/active */
 @utility underline-grow {
   position: relative;
   &::after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    bottom: -2px;
-    height: 1px;
-    width: 0%;
-    background: var(--gold);
-    transition: width 0.3s ease, left 0.3s ease;
+    content: ""; position: absolute; left: 50%; bottom: -4px; height: 1px; width: 0%;
+    background: var(--foreground); transition: width 0.4s ease, left 0.4s ease;
   }
-  &:hover::after,
-  &.is-active::after {
-    width: 100%;
-    left: 0%;
-  }
+  &:hover::after, &.is-active::after { width: 100%; left: 0%; }
 }
 
-/* Two stacked images that crossfade on hover (product cards) */
-@utility img-crossfade-base {
-  transition: opacity 0.6s ease, transform 0.7s ease;
-}
-@utility img-crossfade-top {
-  transition: opacity 0.6s ease, transform 0.7s ease;
-  opacity: 0;
-  position: absolute;
-  inset: 0;
-}
-.group:hover .img-crossfade-base {
-  opacity: 0;
-}
-.group:hover .img-crossfade-top {
-  opacity: 1;
-  transform: scale(1.08);
-}
+@utility marquee-viewport { overflow: hidden; width: 100%; }
+@utility marquee-track { display: flex; width: max-content; animation: marquee 30s linear infinite; }
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
-/* Staggered entrance for lists of elements, set --stagger-i per child */
-@utility stagger-in {
-  opacity: 0;
-  animation: fade-in-up 0.6s ease-out both;
-  animation-delay: calc(var(--stagger-i, 0) * 90ms);
-}
+@keyframes slide-bg { from { background-position: 0 0; } to { background-position: 160px 0; } }
+@utility animate-glass-loop { animation: slide-bg 6s linear infinite; }
 
-/* Route/page transition wrapper */
-@keyframes page-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@utility page-transition {
-  animation: page-in 0.45s ease-out both;
-}
-
-/* Gentle continuous shimmer sweep for hero/CTA highlights */
-@keyframes text-pop {
-  from { opacity: 0; transform: translateY(14px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@utility text-pop-in {
-  opacity: 0;
-  animation: text-pop 0.7s ease-out both;
-}
-
-/* Cinematic hero background — video/aurora layer effects */
-@keyframes aurora-drift {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(5%, -7%) scale(1.15); }
-  66% { transform: translate(-6%, 5%) scale(0.92); }
-}
-@utility aurora-blob {
-  animation: aurora-drift 20s ease-in-out infinite;
-  filter: blur(90px);
-}
-
-@keyframes sparkle-twinkle {
-  0%, 100% { opacity: 0; transform: scale(0.5); }
-  50% { opacity: 1; transform: scale(1); }
-}
-@utility sparkle-dot {
-  animation: sparkle-twinkle 3s ease-in-out infinite;
-}
-
-@keyframes shine-sweep {
-  0% { transform: translateX(-130%) skewX(-12deg); }
-  100% { transform: translateX(230%) skewX(-12deg); }
-}
-@utility shine-sweep {
-  animation: shine-sweep 3.2s ease-in-out infinite;
-}
-
-@utility hero-vignette {
-  background:
-    radial-gradient(ellipse at center, transparent 35%, var(--background) 100%),
-    linear-gradient(to right, var(--background) 0%, transparent 35%, transparent 65%, var(--background) 100%);
-}
-
-/* Modal entrance: fade + gentle scale-up */
-@keyframes modal-pop {
-  from { opacity: 0; transform: translate(-50%, -50%) scale(0.94); }
-  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-}
-@utility modal-pop-in {
-  animation: modal-pop 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-/* Search panel: anchored to top, slides down + fades in */
-@keyframes search-pop {
-  from { opacity: 0; transform: translate(-50%, -12px); }
-  to { opacity: 1; transform: translate(-50%, 0); }
-}
-@utility search-pop-in {
-  animation: search-pop 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: var(--gold);
-  border-radius: 3px;
-}
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }

@@ -49,10 +49,10 @@ function Contact() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-16 md:px-6">
+    <div className="mx-auto max-w-6xl px-4 pt-32 pb-16 md:px-6">
       <header className="text-center">
         <span className="text-xs uppercase tracking-[0.3em] text-gold/70">Say hello</span>
-        <h1 className="mt-3 font-serif text-4xl sm:text-5xl text-primary">Get in touch</h1>
+        <h1 className="mt-3 font-serif text-5xl text-primary">Get in touch</h1>
         <p className="mt-3 text-muted-foreground">We reply to every message within 24 hours.</p>
       </header>
 

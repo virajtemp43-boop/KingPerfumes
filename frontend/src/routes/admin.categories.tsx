@@ -17,11 +17,11 @@ function AdminCategories() {
 
   // Placeholder images for categories that don't have custom images
   const categoryPlaceholders: Record<string, { img: string; desc: string }> = {
-    "Eau de Parfum": { img: "https://picsum.photos/seed/cat-edp/800/1000", desc: "Intense, long-lasting luxury" },
-    "Eau de Toilette": { img: "https://picsum.photos/seed/cat-edt/800/1000", desc: "Fresh, everyday elegance" },
-    "Attars & Oils": { img: "https://picsum.photos/seed/cat-attar/800/1000", desc: "Pure, concentrated tradition" },
-    "Eau de Cologne": { img: "https://picsum.photos/seed/cat-cologne/800/1000", desc: "Light, refreshing classics" },
-    "Attar": { img: "https://picsum.photos/seed/cat-attar/800/1000", desc: "Explore our Attar Collection" },
+    "Eau de Parfum": { img: "/images/cat-edp.jpg", desc: "Intense, long-lasting luxury" },
+    "Eau de Toilette": { img: "/images/cat-edt.jpg", desc: "Fresh, everyday elegance" },
+    "Attars & Oils": { img: "/images/cat-attar.jpg", desc: "Pure, concentrated tradition" },
+    "Eau de Cologne": { img: "/images/cat-cologne.jpg", desc: "Light, refreshing classics" },
+    "Attar": { img: "/images/cat-attar.jpg", desc: "Explore our Attar Collection" },
   };
 
   const handleDelete = async (c: Category) => {

@@ -82,11 +82,11 @@ function Shop() {
   );
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 md:px-6">
+    <div className="mx-auto max-w-7xl px-4 pt-32 pb-12 md:px-6">
       <header className="mb-10 text-center">
         <Crown className="mx-auto h-6 w-6 text-gold/50" />
         <span className="mt-2 block text-xs uppercase tracking-[0.3em] text-gold/70">Shop</span>
-        <h1 className="mt-3 font-serif text-4xl sm:text-5xl text-primary">Royal Collection</h1>
+        <h1 className="mt-3 font-serif text-5xl text-primary">Royal Collection</h1>
         <p className="mt-3 text-muted-foreground">Discover your signature scent from our curated collection.</p>
       </header>
 
