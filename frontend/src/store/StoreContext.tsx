@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
-const API_BASE = "https://king-backend-phi.vercel.app/app";
+const API_BASE = "https://king-backend-phi.vercel.app/api";
 
 export type Product = {
   id: string;
