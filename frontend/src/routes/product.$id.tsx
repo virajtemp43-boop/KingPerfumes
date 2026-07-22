@@ -29,30 +29,54 @@ function ProductDetail() {
   const navigate = useNavigate();
   
   // Try loader data first, then fallback to store
-  const product = loaderData?.product || products.find((p) => p.id === id || p.slug === id);
-  const [size, setSize] = useState<string | null>(null);
-  const [qty, setQty] = useState(1);
-  const [mainIdx, setMainIdx] = useState(0);
+const product =
+  loaderData?.product ||
+  products.find((p) => p.id === id || p.slug === id);
 
+const [size, setSize] = useState<string | null>(null);
+const [qty, setQty] = useState(1);
+const [mainIdx, setMainIdx] = useState(0);
+
+const sizes = useMemo(() => {
   if (!product) {
-    return (
-      <div className="mx-auto max-w-2xl px-4 py-32 text-center">
-        <Crown className="mx-auto h-12 w-12 text-gold/30" />
-        <h1 className="mt-4 font-serif text-4xl text-primary">Fragrance not found</h1>
-        <p className="mt-2 text-muted-foreground">The product you're looking for doesn't exist or may have been removed.</p>
-        <Link to="/shop" className="mt-6 inline-block rounded-full bg-gold px-6 py-3 text-sm text-gold-foreground">Back to shop</Link>
-      </div>
-    );
+    return [{ size: "50ml", price: 0 }];
   }
 
-  // Parse sizes - support both old string array and new object array format
-  const sizes = useMemo(() => {
-    const raw = product.sizes || ["50ml"];
-    if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === "object") {
-      return raw as { size: string; price: number }[];
-    }
-    return (raw as string[]).map((s: string) => ({ size: s, price: product.price }));
-  }, [product.sizes, product.price]);
+  const raw = product.sizes || ["50ml"];
+
+  if (
+    Array.isArray(raw) &&
+    raw.length > 0 &&
+    typeof raw[0] === "object"
+  ) {
+    return raw as { size: string; price: number }[];
+  }
+
+  return (raw as string[]).map((s) => ({
+    size: s,
+    price: product.price,
+  }));
+}, [product]);
+
+if (!product) {
+  return (
+    <div className="mx-auto max-w-2xl px-4 py-32 text-center">
+      <Crown className="mx-auto h-12 w-12 text-gold/30" />
+      <h1 className="mt-4 font-serif text-4xl text-primary">
+        Fragrance not found
+      </h1>
+      <p className="mt-2 text-muted-foreground">
+        The product you're looking for doesn't exist or may have been removed.
+      </p>
+      <Link
+        to="/shop"
+        className="mt-6 inline-block rounded-full bg-gold px-6 py-3 text-sm text-gold-foreground"
+      >
+        Back to shop
+      </Link>
+    </div>
+  );
+}
 
   const currentSize = size ?? sizes[0].size;
   const currentSizeData = sizes.find((s) => s.size === currentSize) || sizes[0];
