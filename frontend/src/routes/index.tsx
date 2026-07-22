@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState, useEffect } from "react";
-import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { motion, useScroll, useTransform, AnimatePresence, type Variants } from "framer-motion";
 import { ChevronRight, ArrowRight, Play, Plus } from "lucide-react";
 import { useStore } from "@/store/StoreContext";
 import { ProductCard } from "@/components/ProductCard";
@@ -16,9 +16,19 @@ export const Route = createFileRoute("/")({
 });
 
 // --- ANIMATION VARIANTS ---
-const fadeUp = {
-  hidden: { opacity: 0, y: 40 },
-  visible: { opacity: 1, y: 0, transition: { duration: 1, ease: [0.16, 1, 0.3, 1] } },
+const fadeUp: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 40,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 1,
+      ease: [0.16, 1, 0.3, 1] as const,
+    },
+  },
 };
 
 const staggerContainer = {
@@ -29,9 +39,23 @@ const staggerContainer = {
   },
 };
 
-const wordAnimation = {
-  hidden: { opacity: 0, y: 50, rotateX: -20 },
-  visible: { opacity: 1, y: 0, rotateX: 0, transition: { duration: 1, ease: [0.16, 1, 0.3, 1] } },
+const EASE = [0.16, 1, 0.3, 1] as const;
+
+const wordAnimation: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 50,
+    rotateX: -20,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    rotateX: 0,
+    transition: {
+      duration: 1,
+      ease: EASE,
+    },
+  },
 };
 
 function Home() {
