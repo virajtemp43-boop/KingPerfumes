@@ -12,8 +12,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || "rzp_test_TJjMetG85LWkak";
-const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || "IGpoUruSqEIU0436E7Z21M28";
+const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || "rzp_test_XXXXXXXXXXXXXXXX";
+const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || "";
 
 let razorpay = null;
 if (RAZORPAY_KEY_SECRET) {
@@ -83,7 +83,6 @@ app.get("/api/products", async (req, res) => {
       ...prod,
       images: typeof prod.images === "string" ? JSON.parse(prod.images) : prod.images,
       sizes: typeof prod.sizes === "string" ? JSON.parse(prod.sizes) : prod.sizes,
-      noteImages: typeof prod.note_images === "string" ? JSON.parse(prod.note_images) : (prod.note_images || []),
     }));
 
     res.json({ products: parsed, total, page: p, totalPages: Math.ceil(total / lmt) });
@@ -100,7 +99,6 @@ app.get("/api/products/:slug", async (req, res) => {
     if (!product) return res.status(404).json({ error: "Product not found" });
     product.images = typeof product.images === "string" ? JSON.parse(product.images) : product.images;
     product.sizes = typeof product.sizes === "string" ? JSON.parse(product.sizes) : product.sizes;
-    product.noteImages = typeof product.note_images === "string" ? JSON.parse(product.note_images) : (product.note_images || []);
     res.json(product);
   } catch (err) {
     console.error("Product fetch error:", err);
@@ -120,12 +118,12 @@ app.post("/api/products", async (req, res) => {
     const sizesJson = typeof sizes === "string" ? sizes : JSON.stringify(sizes);
     
     await pool.execute(
-      `INSERT INTO products (id, name, slug, category, price, original_price, description, notes, top_notes, middle_notes, base_notes, how_to_use, images, sizes, gender, stock, rating, review_count, badge, status, note_images)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO products (id, name, slug, category, price, original_price, description, notes, top_notes, middle_notes, base_notes, how_to_use, images, sizes, gender, stock, rating, review_count, badge, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [id, product.name, product.slug, product.category, product.price, product.originalPrice || null, product.description,
        product.notes || "", product.topNotes || "", product.middleNotes || "", product.baseNotes || "", product.howToUse || "",
        JSON.stringify(product.images || []), sizesJson, product.gender || "Unisex",
-       product.stock || 0, product.rating || 4.5, product.reviewCount || 0, product.badge || null, product.status || "active", JSON.stringify(product.noteImages || [])]
+       product.stock || 0, product.rating || 4.5, product.reviewCount || 0, product.badge || null, product.status || "active"]
     );
     res.status(201).json({ id, message: "Product created" });
   } catch (err) {
@@ -146,10 +144,10 @@ app.put("/api/products/:id", async (req, res) => {
     const sizesJson = typeof sizes === "string" ? sizes : JSON.stringify(sizes);
     
     await pool.execute(
-      `UPDATE products SET name=?, slug=?, category=?, price=?, original_price=?, description=?, notes=?, top_notes=?, middle_notes=?, base_notes=?, how_to_use=?, images=?, sizes=?, gender=?, stock=?, rating=?, review_count=?, badge=?, status=?, note_images=? WHERE id=?`,
+      `UPDATE products SET name=?, slug=?, category=?, price=?, original_price=?, description=?, notes=?, top_notes=?, middle_notes=?, base_notes=?, how_to_use=?, images=?, sizes=?, gender=?, stock=?, rating=?, review_count=?, badge=?, status=? WHERE id=?`,
       [p.name, p.slug, p.category, p.price, p.originalPrice || null, p.description, p.notes || "", p.topNotes || "",
        p.middleNotes || "", p.baseNotes || "", p.howToUse || "", JSON.stringify(p.images || []), sizesJson,
-       p.gender || "Unisex", p.stock || 0, p.rating || 4.5, p.reviewCount || 0, p.badge || null, p.status || "active", JSON.stringify(p.noteImages || []), id]
+       p.gender || "Unisex", p.stock || 0, p.rating || 4.5, p.reviewCount || 0, p.badge || null, p.status || "active", id]
     );
     res.json({ message: "Product updated" });
   } catch (err) {
@@ -413,13 +411,8 @@ app.post("/api/orders", async (req, res) => {
         price,
       });
     }
-    // Free shipping for Rajkot
-    let shipping = 0;
 
-    if (city.trim().toLowerCase() === "rajkot") {
-        shipping = 0;
-    }
-
+    const shipping = subtotal >= 999 ? 0 : 79;
     const total = subtotal + shipping;
     const orderId = "ORD-" + Date.now().toString().slice(-6);
 

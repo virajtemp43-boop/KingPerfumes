@@ -55,6 +55,12 @@ export async function getPool() {
     )
   `);
 
+  try {
+    await pool.execute(`ALTER TABLE products ADD COLUMN note_images JSON DEFAULT ('[]')`);
+  } catch (err) {
+    // Column already exists or error ignored
+  }
+
   await pool.execute(`
     CREATE TABLE IF NOT EXISTS orders (
       id VARCHAR(100) PRIMARY KEY,
