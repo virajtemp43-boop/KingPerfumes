@@ -10,7 +10,7 @@ export const Route = createFileRoute("/product/$id")({
   loader: async ({ params, context }) => {
     // Fetch product data
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products/${params.id}`);
+      const res = await fetch(`http://localhost:3001/api/products/${params.id}`);
       if (res.ok) {
         const data = await res.json();
         return { product: data };
@@ -29,54 +29,30 @@ function ProductDetail() {
   const navigate = useNavigate();
   
   // Try loader data first, then fallback to store
-const product =
-  loaderData?.product ||
-  products.find((p) => p.id === id || p.slug === id);
+  const product = loaderData?.product || products.find((p) => p.id === id || p.slug === id);
+  const [size, setSize] = useState<string | null>(null);
+  const [qty, setQty] = useState(1);
+  const [mainIdx, setMainIdx] = useState(0);
 
-const [size, setSize] = useState<string | null>(null);
-const [qty, setQty] = useState(1);
-const [mainIdx, setMainIdx] = useState(0);
-
-const sizes = useMemo(() => {
   if (!product) {
-    return [{ size: "50ml", price: 0 }];
+    return (
+      <div className="mx-auto max-w-2xl px-4 py-32 text-center">
+        <Crown className="mx-auto h-12 w-12 text-gold/30" />
+        <h1 className="mt-4 font-serif text-4xl text-primary">Fragrance not found</h1>
+        <p className="mt-2 text-muted-foreground">The product you're looking for doesn't exist or may have been removed.</p>
+        <Link to="/shop" className="mt-6 inline-block rounded-full bg-gold px-6 py-3 text-sm text-gold-foreground">Back to shop</Link>
+      </div>
+    );
   }
 
-  const raw = product.sizes || ["50ml"];
-
-  if (
-    Array.isArray(raw) &&
-    raw.length > 0 &&
-    typeof raw[0] === "object"
-  ) {
-    return raw as { size: string; price: number }[];
-  }
-
-  return (raw as string[]).map((s) => ({
-    size: s,
-    price: product.price,
-  }));
-}, [product]);
-
-if (!product) {
-  return (
-    <div className="mx-auto max-w-2xl px-4 py-32 text-center">
-      <Crown className="mx-auto h-12 w-12 text-gold/30" />
-      <h1 className="mt-4 font-serif text-4xl text-primary">
-        Fragrance not found
-      </h1>
-      <p className="mt-2 text-muted-foreground">
-        The product you're looking for doesn't exist or may have been removed.
-      </p>
-      <Link
-        to="/shop"
-        className="mt-6 inline-block rounded-full bg-gold px-6 py-3 text-sm text-gold-foreground"
-      >
-        Back to shop
-      </Link>
-    </div>
-  );
-}
+  // Parse sizes - support both old string array and new object array format
+  const sizes = useMemo(() => {
+    const raw = product.sizes || ["50ml"];
+    if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === "object") {
+      return raw as { size: string; price: number }[];
+    }
+    return (raw as string[]).map((s: string) => ({ size: s, price: product.price }));
+  }, [product.sizes, product.price]);
 
   const currentSize = size ?? sizes[0].size;
   const currentSizeData = sizes.find((s) => s.size === currentSize) || sizes[0];
@@ -90,7 +66,7 @@ if (!product) {
   const handleBuy = () => { addToCart(product.id, currentSize, qty); navigate({ to: "/checkout" }); };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 md:px-6">
+    <div className="mx-auto max-w-7xl px-4 pt-32 pb-12 md:px-6">
       <nav className="mb-8 text-xs text-muted-foreground">
         <Link to="/" className="hover:text-gold">Home</Link> <span className="mx-1">/</span>
         <Link to="/shop" className="hover:text-gold">Shop</Link> <span className="mx-1">/</span>
@@ -117,7 +93,7 @@ if (!product) {
         {/* Details */}
         <div>
           <div className="text-xs uppercase tracking-[0.3em] text-gold/70">{product.category}</div>
-          <h1 className="mt-2 font-serif text-4xl md:text-5xl text-primary">{product.name}</h1>
+          <h1 className="mt-2 font-sans font-bold text-3xl md:text-4xl text-primary">{product.name}</h1>
 
           <div className="mt-3 flex items-center gap-2 text-sm">
             <div className="flex text-gold">
@@ -148,6 +124,23 @@ if (!product) {
                 <NoteBar label="Top Notes" notes={product.topNotes} color="bg-gold/80" />
                 <NoteBar label="Heart Notes" notes={product.middleNotes} color="bg-gold/60" />
                 <NoteBar label="Base Notes" notes={product.baseNotes} color="bg-gold/40" />
+              </div>
+            </div>
+          )}
+
+          {/* Notes Images Grid */}
+          {product.noteImages && product.noteImages.length > 0 && (
+            <div className="mt-8">
+              <h3 className="text-xs uppercase tracking-wider text-primary font-bold mb-4">Notes</h3>
+              <div className="flex flex-wrap gap-4">
+                {product.noteImages.map((note: any, i: number) => (
+                  <div key={i} className="flex flex-col items-center w-20">
+                    <div className="w-20 h-24 overflow-hidden mb-2 rounded bg-card border border-border/50">
+                      <img src={note.url} alt={note.name} className="w-full h-full object-cover" />
+                    </div>
+                    <span className="text-[10px] uppercase tracking-wider text-center font-medium text-foreground">{note.name}</span>
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -253,7 +246,7 @@ if (!product) {
       {related.length > 0 && (
         <section className="mt-20">
           <h2 className="font-serif text-3xl text-primary">You May Also Like</h2>
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4 text-left">
             {related.map((p) => <ProductCard key={p.id} product={p} />)}
           </div>
         </section>
