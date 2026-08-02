@@ -31,9 +31,18 @@ function Checkout() {
     return { ...c, product: p, price };
   }).filter(Boolean) as any[], [cart, products]);
 
-  const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
-  const shipping = subtotal >= 999 || subtotal === 0 ? 0 : 79;
-  const total = subtotal + shipping;
+const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
+
+const city = customerDetails.city.trim().toLowerCase();
+
+const shipping =
+  subtotal === 0
+    ? 0
+    : city === "rajkot"
+      ? 0
+      : 79;
+
+const total = subtotal + shipping;
 
   // COD percentage split
   const codPercentage = parseFloat(settings.cod_percentage || "0");

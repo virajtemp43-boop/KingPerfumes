@@ -395,7 +395,13 @@ app.post("/api/orders", async (req, res) => {
       });
     }
 
-    const shipping = subtotal >= 999 ? 0 : 79;
+    // Free shipping for Rajkot
+    let shipping = 0;
+
+    if (city.trim().toLowerCase() === "rajkot") {
+        shipping = 0;
+    }
+
     const total = subtotal + shipping;
     const orderId = "ORD-" + Date.now().toString().slice(-6);
 

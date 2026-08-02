@@ -94,9 +94,20 @@ export function SiteFooter() {
           <Reveal variant="stagger" delay={0.3}>
             <h3 className="font-serif text-lg text-white mb-6 tracking-wide">Client Care</h3>
             <ul className="space-y-4 text-sm text-white/70 font-light">
-              {["Shipping & Delivery", "Returns & Exchanges", "FAQ", "Track Order", "Privacy Policy", "Terms of Service"].map((l) => (
-                <li key={l}>
-                  <a href="#" className="hover:text-gold transition-colors inline-block hover:translate-x-1 duration-300">{l}</a>
+              {[
+                { label: "Shipping & Delivery", to: "#" },
+                { label: "Returns & Exchanges", to: "#" },
+                { label: "FAQ", to: "#" },
+                { label: "Track Order", to: "#" },
+                { label: "Privacy Policy", to: "/privacy" },
+                { label: "Terms of Service", to: "/terms" }
+              ].map((l) => (
+                <li key={l.label}>
+                  {l.to.startsWith("/") ? (
+                    <Link to={l.to} className="hover:text-gold transition-colors inline-block hover:translate-x-1 duration-300">{l.label}</Link>
+                  ) : (
+                    <a href={l.to} className="hover:text-gold transition-colors inline-block hover:translate-x-1 duration-300">{l.label}</a>
+                  )}
                 </li>
               ))}
             </ul>
