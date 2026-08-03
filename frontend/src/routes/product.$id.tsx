@@ -10,7 +10,7 @@ export const Route = createFileRoute("/product/$id")({
   loader: async ({ params, context }) => {
     // Fetch product data
     try {
-      const res = await fetch(`http://localhost:3001/api/products/${params.id}`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products/${params.id}`);
       if (res.ok) {
         const data = await res.json();
         return { product: data };
