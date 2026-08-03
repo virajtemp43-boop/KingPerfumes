@@ -129,21 +129,35 @@ function ProductDetail() {
           )}
 
           {/* Notes Images Grid */}
-          {product.noteImages && product.noteImages.length > 0 && (
-            <div className="mt-8">
-              <h3 className="text-xs uppercase tracking-wider text-primary font-bold mb-4">Notes</h3>
-              <div className="flex flex-wrap gap-4">
-                {product.noteImages.map((note: any, i: number) => (
-                  <div key={i} className="flex flex-col items-center w-20">
-                    <div className="w-20 h-24 overflow-hidden mb-2 rounded bg-card border border-border/50">
-                      <img src={note.url} alt={note.name} className="w-full h-full object-cover" />
+          {(() => {
+             // Safely parse the notes whether the database sent an array or a raw JSON string
+             let notes = [];
+             try {
+               notes = typeof product.noteImages === 'string' 
+                 ? JSON.parse(product.noteImages || "[]") 
+                 : (product.noteImages || []);
+             } catch (e) {
+               notes = [];
+             }
+             
+             if (!Array.isArray(notes) || notes.length === 0) return null;
+
+             return (
+              <div className="mt-8">
+                <h3 className="text-xs uppercase tracking-wider text-primary font-bold mb-4">Notes</h3>
+                <div className="flex flex-wrap gap-4">
+                  {notes.map((note: any, i: number) => (
+                    <div key={i} className="flex flex-col items-center w-20">
+                      <div className="w-20 h-24 overflow-hidden mb-2 rounded bg-card border border-border/50">
+                        <img src={note.url} alt={note.name} className="w-full h-full object-cover" />
+                      </div>
+                      <span className="text-[10px] uppercase tracking-wider text-center font-medium text-foreground">{note.name}</span>
                     </div>
-                    <span className="text-[10px] uppercase tracking-wider text-center font-medium text-foreground">{note.name}</span>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+             );
+          })()}
 
           {/* Size selector with prices */}
           {sizes.length > 1 && (
