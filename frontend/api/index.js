@@ -87,6 +87,7 @@ app.get("/api/products", async (req, res) => {
       ...prod,
       images: typeof prod.images === "string" ? JSON.parse(prod.images) : prod.images,
       sizes: typeof prod.sizes === "string" ? JSON.parse(prod.sizes) : prod.sizes,
+      noteImages: typeof prod.note_images === "string" ? JSON.parse(prod.note_images) : (prod.note_images || []),
     }));
 
     res.json({ products: parsed, total, page: p, totalPages: Math.ceil(total / lmt) });
@@ -102,6 +103,7 @@ app.get("/api/products/:slug", async (req, res) => {
     if (!product) return res.status(404).json({ error: "Product not found" });
     product.images = typeof product.images === "string" ? JSON.parse(product.images) : product.images;
     product.sizes = typeof product.sizes === "string" ? JSON.parse(product.sizes) : product.sizes;
+    product.noteImages = typeof product.note_images === "string" ? JSON.parse(product.note_images) : (product.note_images || []);
     res.json(product);
   } catch (err) {
     console.error("Product fetch error:", err);
