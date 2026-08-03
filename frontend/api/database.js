@@ -52,6 +52,7 @@ export async function initializeDatabase() {
         how_to_use TEXT DEFAULT '',
         images JSON NOT NULL DEFAULT '[]',
         sizes JSON NOT NULL DEFAULT '[]',
+        note_images JSON DEFAULT '[]',
         gender VARCHAR(50) DEFAULT 'Unisex',
         stock INT NOT NULL DEFAULT 0,
         rating DECIMAL(3,1) DEFAULT 0,
@@ -60,6 +61,11 @@ export async function initializeDatabase() {
         status VARCHAR(20) DEFAULT 'active',
         created_at TIMESTAMPTZ DEFAULT NOW()
       );
+    `);
+
+    // Safely add the column to existing databases
+    await sql.query(`
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS note_images JSON DEFAULT '[]';
     `);
 
     await sql.query(`

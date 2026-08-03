@@ -23,6 +23,7 @@ export type Product = {
   reviewCount: number;
   badge?: "Best Seller" | "New" | "Featured";
   status: string;
+  noteImages?: { name: string; url: string }[];
 };
 
 export type CartItem = { productId: string; size: string; quantity: number };

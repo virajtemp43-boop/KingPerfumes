@@ -117,12 +117,13 @@ app.post("/api/products", async (req, res) => {
     const sizesJson = typeof sizes === "string" ? sizes : JSON.stringify(sizes);
 
     await runQuery(
-      `INSERT INTO products (id, name, slug, category, price, original_price, description, notes, top_notes, middle_notes, base_notes, how_to_use, images, sizes, gender, stock, rating, review_count, badge, status)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)`,
+      `INSERT INTO products (id, name, slug, category, price, original_price, description, notes, top_notes, middle_notes, base_notes, how_to_use, images, sizes, gender, stock, rating, review_count, badge, status, note_images)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)`,
       [id, product.name, product.slug, product.category, product.price, product.originalPrice || null, product.description,
        product.notes || "", product.topNotes || "", product.middleNotes || "", product.baseNotes || "", product.howToUse || "",
        JSON.stringify(product.images || []), sizesJson, product.gender || "Unisex",
-       product.stock || 0, product.rating || 4.5, product.reviewCount || 0, product.badge || null, product.status || "active"]
+       product.stock || 0, product.rating || 4.5, product.reviewCount || 0, product.badge || null, product.status || "active", 
+       JSON.stringify(product.noteImages || [])]
     );
     res.status(201).json({ id, message: "Product created" });
   } catch (err) {
@@ -139,10 +140,11 @@ app.put("/api/products/:id", async (req, res) => {
     const sizesJson = typeof sizes === "string" ? sizes : JSON.stringify(sizes);
 
     await runQuery(
-      `UPDATE products SET name=$1, slug=$2, category=$3, price=$4, original_price=$5, description=$6, notes=$7, top_notes=$8, middle_notes=$9, base_notes=$10, how_to_use=$11, images=$12, sizes=$13, gender=$14, stock=$15, rating=$16, review_count=$17, badge=$18, status=$19 WHERE id=$20`,
+      `UPDATE products SET name=$1, slug=$2, category=$3, price=$4, original_price=$5, description=$6, notes=$7, top_notes=$8, middle_notes=$9, base_notes=$10, how_to_use=$11, images=$12, sizes=$13, gender=$14, stock=$15, rating=$16, review_count=$17, badge=$18, status=$19, note_images=$20 WHERE id=$21`,
       [p.name, p.slug, p.category, p.price, p.originalPrice || null, p.description, p.notes || "", p.topNotes || "",
        p.middleNotes || "", p.baseNotes || "", p.howToUse || "", JSON.stringify(p.images || []), sizesJson,
-       p.gender || "Unisex", p.stock || 0, p.rating || 4.5, p.reviewCount || 0, p.badge || null, p.status || "active", id]
+       p.gender || "Unisex", p.stock || 0, p.rating || 4.5, p.reviewCount || 0, p.badge || null, p.status || "active", 
+       JSON.stringify(p.noteImages || []), id]
     );
     res.json({ message: "Product updated" });
   } catch (err) {

@@ -222,15 +222,6 @@ function ProductForm({ initial, categories, onClose, onSubmit }: { initial: Form
     update("sizes", form.sizes.filter((_, i) => i !== index));
   };
 
-  const addNoteImage = () => update("noteImages", [...(form.noteImages || []), { name: "", url: "" }]);
-  const updateNoteImage = (i: number, field: "name" | "url", val: string) => {
-    const list = [...(form.noteImages || [])];
-    list[i][field] = val;
-    update("noteImages", list);
-  };
-  const removeNoteImage = (i: number) => update("noteImages", (form.noteImages || []).filter((_, idx) => idx !== i));
-
-
   // Calculate lowest price from sizes for display
   const lowestPrice = useMemo(() => {
     const prices = form.sizes.map((s) => s.price).filter((p) => p > 0);
@@ -319,38 +310,6 @@ function ProductForm({ initial, categories, onClose, onSubmit }: { initial: Form
 
           <TextArea label="Description" value={form.description} onChange={(v) => update("description", v)} />
           <Field label="Notes (comma separated)" value={form.notes} onChange={(v) => update("notes", v)} />
-          
-          {/* Note Images UI */}
-          <div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs uppercase tracking-wider text-muted-foreground">Notes with Images</span>
-              <button type="button" onClick={addNoteImage} className="text-xs text-gold hover:underline">+ Add Note</button>
-            </div>
-            <div className="mt-2 space-y-2">
-              {(form.noteImages || []).map((n, i) => (
-                <div key={i} className="flex gap-2 items-center">
-                  <input
-                    type="text"
-                    placeholder="Note Name (e.g. Cinnamon)"
-                    value={n.name}
-                    onChange={(e) => updateNoteImage(i, "name", e.target.value)}
-                    className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-gold"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Image URL"
-                    value={n.url}
-                    onChange={(e) => updateNoteImage(i, "url", e.target.value)}
-                    className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-gold"
-                  />
-                  <button type="button" onClick={() => removeNoteImage(i)} className="p-2 text-destructive hover:bg-destructive/10 rounded">
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-
           <div className="grid grid-cols-3 gap-3">
             <Field label="Top Notes" value={form.topNotes} onChange={(v) => update("topNotes", v)} />
             <Field label="Heart Notes" value={form.middleNotes} onChange={(v) => update("middleNotes", v)} />

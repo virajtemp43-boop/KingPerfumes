@@ -107,7 +107,7 @@ function Shop() {
           {paged.length === 0 ? (
             <div className="py-20 text-center text-muted-foreground">No fragrances match your filters.</div>
           ) : (
-            <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {paged.map((p) => <ProductCard key={p.id} product={p} />)}
             </div>
           )}
