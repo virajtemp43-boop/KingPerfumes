@@ -95,8 +95,8 @@ export function SiteFooter() {
             <h3 className="font-serif text-lg text-white mb-6 tracking-wide">Client Care</h3>
             <ul className="space-y-4 text-sm text-white/70 font-light">
               {[
-                { label: "Shipping & Delivery", to: "#" },
-                { label: "Returns & Exchanges", to: "#" },
+                { label: "Shipping & Delivery", to: "/shipping" },
+                { label: "Returns & Exchanges", to: "/returns" },
                 { label: "FAQ", to: "#" },
                 { label: "Track Order", to: "#" },
                 { label: "Privacy Policy", to: "/privacy" },
