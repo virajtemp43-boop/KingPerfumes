@@ -13,7 +13,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || "rzp_test_TJjMetG85LWkak";
-const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || "IGpoUruSqEIU0436E7Z21M28";
+const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || "";
 
 let razorpay = null;
 if (RAZORPAY_KEY_SECRET) {
@@ -382,19 +382,20 @@ app.post("/api/orders", async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
+    const pool = await getPool();
     let subtotal = 0;
     const orderItems = [];
 
-    // Process each item in the cart
     for (const item of items) {
-      // FIX: Use queryOne to safely fetch from Postgres!
-      const product = await queryOne("SELECT * FROM products WHERE id = $1", [item.productId]);
-      
+      const [products] = await pool.execute("SELECT * FROM products WHERE id = ?", [item.productId]);
+      const product = products[0];
       if (!product) return res.status(400).json({ error: `Product ${item.productId} not found` });
       
+      // Get price based on size if sizes is an array of objects
       const sizes = typeof product.sizes === "string" ? JSON.parse(product.sizes) : product.sizes;
       let price = Number(product.price);
       
+      // If sizes is an array of objects with size/price, find the matching size price
       if (Array.isArray(sizes) && sizes.length > 0 && typeof sizes[0] === "object") {
         const matchedSize = sizes.find((s) => s.size === item.size);
         if (matchedSize && matchedSize.price) {
@@ -412,8 +413,9 @@ app.post("/api/orders", async (req, res) => {
         price,
       });
     }
-
+    // Free shipping for Rajkot
     let shipping = 0;
+
     if (city.trim().toLowerCase() === "rajkot") {
         shipping = 0;
     }
@@ -435,21 +437,18 @@ app.post("/api/orders", async (req, res) => {
       }
     }
 
-    // FIX: Insert order using runQuery with PostgreSQL $X parameters
-    await runQuery(
+    await pool.execute(
       `INSERT INTO orders (id, customer_name, customer_email, customer_phone, address, city, state, pincode, subtotal, shipping, total, payment_method, razorpay_order_id, order_status)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [orderId, customerName, customerEmail, customerPhone, address, city, state, pincode, subtotal, shipping, total, paymentMethod, razorpayOrder?.id || null, "Processing"]
     );
 
-    // FIX: Insert order items using runQuery with PostgreSQL $X parameters
     for (const item of orderItems) {
-      await runQuery(
-        "INSERT INTO order_items (id, order_id, product_id, product_name, size, quantity, price) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+      await pool.execute(
+        "INSERT INTO order_items (id, order_id, product_id, product_name, size, quantity, price) VALUES (?, ?, ?, ?, ?, ?, ?)",
         [uuid(), orderId, item.productId, item.productName, item.size, item.quantity, item.price]
       );
-      // Reduce stock
-      await runQuery("UPDATE products SET stock = stock - $1 WHERE id = $2", [item.quantity, item.productId]);
+      await pool.execute("UPDATE products SET stock = stock - ? WHERE id = ?", [item.quantity, item.productId]);
     }
 
     res.status(201).json({
@@ -458,7 +457,7 @@ app.post("/api/orders", async (req, res) => {
         id: razorpayOrder.id,
         amount: razorpayOrder.amount,
         currency: razorpayOrder.currency,
-        key_id: process.env.RAZORPAY_KEY_ID, 
+        key_id: RAZORPAY_KEY_ID,
       } : null,
       total,
     });
@@ -472,9 +471,9 @@ app.post("/api/orders", async (req, res) => {
 app.post("/api/orders/verify", async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, orderId } = req.body;
-    // FIX: Postgres UPDATE with $1, $2, $3
-    await runQuery(
-      "UPDATE orders SET razorpay_payment_id = $1, payment_status = 'paid', order_status = 'Confirmed' WHERE razorpay_order_id = $2 OR id = $3",
+    const pool = await getPool();
+    await pool.execute(
+      "UPDATE orders SET razorpay_payment_id = ?, payment_status = 'paid', order_status = 'Confirmed' WHERE razorpay_order_id = ? OR id = ?",
       [razorpay_payment_id, razorpay_order_id, orderId]
     );
     res.json({ success: true, message: "Payment verified" });
