@@ -5,7 +5,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { v4 as uuid } from "uuid";
 import Razorpay from "razorpay";
-import { getPool, queryAll, queryOne, runQuery } from "./database.js";
+// FIX: Removed getPool(), using the correct PostgreSQL query functions
+import { queryAll, queryOne, runQuery } from "./database.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -54,13 +55,15 @@ app.get("/api/products", async (req, res) => {
 
     let sql = "SELECT * FROM products WHERE status = 'active'";
     const params = [];
+    let paramIndex = 1;
 
-    if (category) { sql += " AND category = ?"; params.push(category); }
-    if (gender) { sql += " AND gender = ?"; params.push(gender); }
-    if (minPrice) { sql += " AND price >= ?"; params.push(parseInt(minPrice)); }
-    if (maxPrice) { sql += " AND price <= ?"; params.push(parseInt(maxPrice)); }
+    if (category) { sql += ` AND category = $${paramIndex++}`; params.push(category); }
+    if (gender) { sql += ` AND gender = $${paramIndex++}`; params.push(gender); }
+    if (minPrice) { sql += ` AND price >= $${paramIndex++}`; params.push(parseInt(minPrice)); }
+    if (maxPrice) { sql += ` AND price <= $${paramIndex++}`; params.push(parseInt(maxPrice)); }
     if (search) {
-      sql += " AND (name LIKE ? OR description LIKE ? OR notes LIKE ?)";
+      // Postgres uses ILIKE for case-insensitive search
+      sql += ` AND (name ILIKE $${paramIndex++} OR description ILIKE $${paramIndex++} OR notes ILIKE $${paramIndex++})`;
       const s = `%${search}%`;
       params.push(s, s, s);
     }
@@ -72,8 +75,7 @@ app.get("/api/products", async (req, res) => {
       default: sql += " ORDER BY review_count DESC";
     }
 
-    const pool = await getPool();
-    const [allProducts] = await pool.execute(sql, params);
+    const allProducts = await queryAll(sql, params);
     const total = allProducts.length;
     const p = parseInt(page);
     const lmt = parseInt(limit);
@@ -96,11 +98,13 @@ app.get("/api/products", async (req, res) => {
 // GET /api/products/:slug — single product
 app.get("/api/products/:slug", async (req, res) => {
   try {
-    const product = await queryOne("SELECT * FROM products WHERE slug = ? OR id = ?", [req.params.slug, req.params.slug]);
+    const product = await queryOne("SELECT * FROM products WHERE slug = $1 OR id = $2", [req.params.slug, req.params.slug]);
     if (!product) return res.status(404).json({ error: "Product not found" });
+    
     product.images = typeof product.images === "string" ? JSON.parse(product.images) : product.images;
     product.sizes = typeof product.sizes === "string" ? JSON.parse(product.sizes) : product.sizes;
     product.noteImages = typeof product.note_images === "string" ? JSON.parse(product.note_images) : (product.note_images || []);
+    
     res.json(product);
   } catch (err) {
     console.error("Product fetch error:", err);
@@ -113,15 +117,12 @@ app.post("/api/products", async (req, res) => {
   try {
     const product = req.body;
     const id = product.id || `p${Date.now()}`;
-    const pool = await getPool();
-    
-    // Handle sizes as array of objects with size and price, or fallback to string array
     const sizes = product.sizes || ["50ml"];
     const sizesJson = typeof sizes === "string" ? sizes : JSON.stringify(sizes);
     
-    await pool.execute(
+    await runQuery(
       `INSERT INTO products (id, name, slug, category, price, original_price, description, notes, top_notes, middle_notes, base_notes, how_to_use, images, sizes, gender, stock, rating, review_count, badge, status, note_images)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)`,
       [id, product.name, product.slug, product.category, product.price, product.originalPrice || null, product.description,
        product.notes || "", product.topNotes || "", product.middleNotes || "", product.baseNotes || "", product.howToUse || "",
        JSON.stringify(product.images || []), sizesJson, product.gender || "Unisex",
@@ -139,14 +140,11 @@ app.put("/api/products/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const p = req.body;
-    const pool = await getPool();
-    
-    // Handle sizes as array of objects with size and price, or fallback to string array
     const sizes = p.sizes || ["50ml"];
     const sizesJson = typeof sizes === "string" ? sizes : JSON.stringify(sizes);
     
-    await pool.execute(
-      `UPDATE products SET name=?, slug=?, category=?, price=?, original_price=?, description=?, notes=?, top_notes=?, middle_notes=?, base_notes=?, how_to_use=?, images=?, sizes=?, gender=?, stock=?, rating=?, review_count=?, badge=?, status=?, note_images=? WHERE id=?`,
+    await runQuery(
+      `UPDATE products SET name=$1, slug=$2, category=$3, price=$4, original_price=$5, description=$6, notes=$7, top_notes=$8, middle_notes=$9, base_notes=$10, how_to_use=$11, images=$12, sizes=$13, gender=$14, stock=$15, rating=$16, review_count=$17, badge=$18, status=$19, note_images=$20 WHERE id=$21`,
       [p.name, p.slug, p.category, p.price, p.originalPrice || null, p.description, p.notes || "", p.topNotes || "",
        p.middleNotes || "", p.baseNotes || "", p.howToUse || "", JSON.stringify(p.images || []), sizesJson,
        p.gender || "Unisex", p.stock || 0, p.rating || 4.5, p.reviewCount || 0, p.badge || null, p.status || "active", JSON.stringify(p.noteImages || []), id]
@@ -161,22 +159,20 @@ app.put("/api/products/:id", async (req, res) => {
 // DELETE /api/products/:id — delete product (admin)
 app.delete("/api/products/:id", async (req, res) => {
   try {
-    const pool = await getPool();
-    await pool.execute("DELETE FROM products WHERE id = ?", [req.params.id]);
+    await runQuery("DELETE FROM products WHERE id = $1", [req.params.id]);
     res.json({ message: "Product deleted" });
   } catch (err) {
     res.status(500).json({ error: "Failed to delete product" });
   }
 });
 
-// POST /api/upload — image upload
+// POST /api/upload & POST /api/upload/multiple remains unchanged
 app.post("/api/upload", upload.single("image"), (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No file uploaded" });
   const url = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
   res.json({ url, filename: req.file.filename });
 });
 
-// POST /api/upload/multiple — multiple image upload
 app.post("/api/upload/multiple", upload.array("images", 10), (req, res) => {
   if (!req.files || req.files.length === 0) return res.status(400).json({ error: "No files uploaded" });
   const urls = req.files.map((f) => `${req.protocol}://${req.get("host")}/uploads/${f.filename}`);
@@ -185,19 +181,15 @@ app.post("/api/upload/multiple", upload.array("images", 10), (req, res) => {
 
 // ==================== CATEGORIES API ====================
 
-// GET /api/categories — list all categories (including from existing products)
 app.get("/api/categories", async (req, res) => {
   try {
-    // Get categories from categories table
     const dbCategories = await queryAll("SELECT * FROM categories ORDER BY name ASC");
     const dbNames = new Set(dbCategories.map((c) => c.name));
     
-    // Get all unique product categories that aren't in the categories table
     const productCategories = await queryAll(
       "SELECT DISTINCT category FROM products WHERE category IS NOT NULL AND category != ''"
     );
     
-    // Create virtual category entries for product categories not in the table
     for (const pc of productCategories) {
       if (!dbNames.has(pc.category)) {
         dbCategories.push({
@@ -209,7 +201,6 @@ app.get("/api/categories", async (req, res) => {
         });
       }
     }
-    
     res.json(dbCategories);
   } catch (err) {
     console.error("Categories fetch error:", err);
@@ -217,15 +208,15 @@ app.get("/api/categories", async (req, res) => {
   }
 });
 
-// POST /api/categories — create category
 app.post("/api/categories", async (req, res) => {
   try {
     const { name, image, description } = req.body;
     if (!name) return res.status(400).json({ error: "Category name is required" });
     const id = `cat${Date.now()}`;
     const slug = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+    
     await runQuery(
-      "INSERT INTO categories (id, name, slug, image, description) VALUES (?, ?, ?, ?, ?)",
+      "INSERT INTO categories (id, name, slug, image, description) VALUES ($1, $2, $3, $4, $5)",
       [id, name, slug, image || "", description || ""]
     );
     res.status(201).json({ id, message: "Category created" });
@@ -235,7 +226,6 @@ app.post("/api/categories", async (req, res) => {
   }
 });
 
-// PUT /api/categories/:id — update category
 app.put("/api/categories/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -245,14 +235,15 @@ app.put("/api/categories/:id", async (req, res) => {
     let sql = "UPDATE categories SET";
     const params = [];
     const updates = [];
+    let paramIndex = 1;
     
-    if (name !== undefined) { updates.push(" name=?"); params.push(name); updates.push(" slug=?"); params.push(slug); }
-    if (image !== undefined) { updates.push(" image=?"); params.push(image); }
-    if (description !== undefined) { updates.push(" description=?"); params.push(description); }
+    if (name !== undefined) { updates.push(` name=$${paramIndex++}`); params.push(name); updates.push(` slug=$${paramIndex++}`); params.push(slug); }
+    if (image !== undefined) { updates.push(` image=$${paramIndex++}`); params.push(image); }
+    if (description !== undefined) { updates.push(` description=$${paramIndex++}`); params.push(description); }
     
     if (updates.length === 0) return res.status(400).json({ error: "No fields to update" });
     
-    sql += updates.join(",") + " WHERE id=?";
+    sql += updates.join(",") + ` WHERE id=$${paramIndex}`;
     params.push(id);
     
     await runQuery(sql, params);
@@ -263,10 +254,9 @@ app.put("/api/categories/:id", async (req, res) => {
   }
 });
 
-// DELETE /api/categories/:id — delete category
 app.delete("/api/categories/:id", async (req, res) => {
   try {
-    await runQuery("DELETE FROM categories WHERE id = ?", [req.params.id]);
+    await runQuery("DELETE FROM categories WHERE id = $1", [req.params.id]);
     res.json({ message: "Category deleted" });
   } catch (err) {
     res.status(500).json({ error: "Failed to delete category" });
@@ -275,7 +265,6 @@ app.delete("/api/categories/:id", async (req, res) => {
 
 // ==================== CONTACT MESSAGES API ====================
 
-// POST /api/contact — submit contact form
 app.post("/api/contact", async (req, res) => {
   try {
     const { name, email, subject, message } = req.body;
@@ -284,7 +273,7 @@ app.post("/api/contact", async (req, res) => {
     }
     const id = `msg${Date.now()}`;
     await runQuery(
-      "INSERT INTO contact_messages (id, name, email, subject, message) VALUES (?, ?, ?, ?, ?)",
+      "INSERT INTO contact_messages (id, name, email, subject, message) VALUES ($1, $2, $3, $4, $5)",
       [id, name, email, subject || "", message]
     );
     res.status(201).json({ id, message: "Message sent successfully" });
@@ -294,7 +283,6 @@ app.post("/api/contact", async (req, res) => {
   }
 });
 
-// GET /api/contact — list all contact messages (admin)
 app.get("/api/contact", async (req, res) => {
   try {
     const messages = await queryAll("SELECT * FROM contact_messages ORDER BY created_at DESC");
@@ -304,20 +292,18 @@ app.get("/api/contact", async (req, res) => {
   }
 });
 
-// PUT /api/contact/:id/read — mark message as read
 app.put("/api/contact/:id/read", async (req, res) => {
   try {
-    await runQuery("UPDATE contact_messages SET is_read = 1 WHERE id = ?", [req.params.id]);
+    await runQuery("UPDATE contact_messages SET is_read = 1 WHERE id = $1", [req.params.id]);
     res.json({ message: "Message marked as read" });
   } catch (err) {
     res.status(500).json({ error: "Failed to update message" });
   }
 });
 
-// DELETE /api/contact/:id — delete message
 app.delete("/api/contact/:id", async (req, res) => {
   try {
-    await runQuery("DELETE FROM contact_messages WHERE id = ?", [req.params.id]);
+    await runQuery("DELETE FROM contact_messages WHERE id = $1", [req.params.id]);
     res.json({ message: "Message deleted" });
   } catch (err) {
     res.status(500).json({ error: "Failed to delete message" });
@@ -326,7 +312,6 @@ app.delete("/api/contact/:id", async (req, res) => {
 
 // ==================== SETTINGS API ====================
 
-// GET /api/settings — get all settings
 app.get("/api/settings", async (req, res) => {
   try {
     const settings = await queryAll("SELECT * FROM settings");
@@ -340,13 +325,13 @@ app.get("/api/settings", async (req, res) => {
   }
 });
 
-// PUT /api/settings — update settings
 app.put("/api/settings", async (req, res) => {
   try {
     const settings = req.body;
     for (const [key, value] of Object.entries(settings)) {
+      // FIX: Postgres uses ON CONFLICT instead of ON DUPLICATE KEY
       await runQuery(
-        "INSERT INTO settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = ?",
+        "INSERT INTO settings (setting_key, setting_value) VALUES ($1, $2) ON CONFLICT (setting_key) DO UPDATE SET setting_value = $3",
         [key, value, value]
       );
     }
@@ -358,22 +343,18 @@ app.put("/api/settings", async (req, res) => {
 
 // ==================== ORDERS API ====================
 
-// GET /api/orders — list all orders (admin)
 app.get("/api/orders", async (req, res) => {
   try {
-    const pool = await getPool();
-    const [rows] = await pool.execute("SELECT * FROM orders ORDER BY created_at DESC");
-    for (const order of rows) {
-      const [items] = await pool.execute("SELECT * FROM order_items WHERE order_id = ?", [order.id]);
-      order.items = items;
+    const orders = await queryAll("SELECT * FROM orders ORDER BY created_at DESC");
+    for (const order of orders) {
+      order.items = await queryAll("SELECT * FROM order_items WHERE order_id = $1", [order.id]);
     }
-    res.json(rows);
+    res.json(orders);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch orders" });
   }
 });
 
-// POST /api/orders — create order (guest checkout)
 app.post("/api/orders", async (req, res) => {
   try {
     const { customerName, customerEmail, customerPhone, address, city, state, pincode, items, paymentMethod = "razorpay" } = req.body;
@@ -382,20 +363,17 @@ app.post("/api/orders", async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    const pool = await getPool();
     let subtotal = 0;
     const orderItems = [];
 
     for (const item of items) {
-      const [products] = await pool.execute("SELECT * FROM products WHERE id = ?", [item.productId]);
-      const product = products[0];
+      // FIX: Used PostgreSQL queryOne
+      const product = await queryOne("SELECT * FROM products WHERE id = $1", [item.productId]);
       if (!product) return res.status(400).json({ error: `Product ${item.productId} not found` });
       
-      // Get price based on size if sizes is an array of objects
       const sizes = typeof product.sizes === "string" ? JSON.parse(product.sizes) : product.sizes;
       let price = Number(product.price);
       
-      // If sizes is an array of objects with size/price, find the matching size price
       if (Array.isArray(sizes) && sizes.length > 0 && typeof sizes[0] === "object") {
         const matchedSize = sizes.find((s) => s.size === item.size);
         if (matchedSize && matchedSize.price) {
@@ -413,9 +391,8 @@ app.post("/api/orders", async (req, res) => {
         price,
       });
     }
-    // Free shipping for Rajkot
-    let shipping = 0;
 
+    let shipping = 0;
     if (city.trim().toLowerCase() === "rajkot") {
         shipping = 0;
     }
@@ -437,18 +414,18 @@ app.post("/api/orders", async (req, res) => {
       }
     }
 
-    await pool.execute(
+    await runQuery(
       `INSERT INTO orders (id, customer_name, customer_email, customer_phone, address, city, state, pincode, subtotal, shipping, total, payment_method, razorpay_order_id, order_status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
       [orderId, customerName, customerEmail, customerPhone, address, city, state, pincode, subtotal, shipping, total, paymentMethod, razorpayOrder?.id || null, "Processing"]
     );
 
     for (const item of orderItems) {
-      await pool.execute(
-        "INSERT INTO order_items (id, order_id, product_id, product_name, size, quantity, price) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      await runQuery(
+        "INSERT INTO order_items (id, order_id, product_id, product_name, size, quantity, price) VALUES ($1, $2, $3, $4, $5, $6, $7)",
         [uuid(), orderId, item.productId, item.productName, item.size, item.quantity, item.price]
       );
-      await pool.execute("UPDATE products SET stock = stock - ? WHERE id = ?", [item.quantity, item.productId]);
+      await runQuery("UPDATE products SET stock = stock - $1 WHERE id = $2", [item.quantity, item.productId]);
     }
 
     res.status(201).json({
@@ -467,13 +444,11 @@ app.post("/api/orders", async (req, res) => {
   }
 });
 
-// POST /api/orders/verify — verify Razorpay payment
 app.post("/api/orders/verify", async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, orderId } = req.body;
-    const pool = await getPool();
-    await pool.execute(
-      "UPDATE orders SET razorpay_payment_id = ?, payment_status = 'paid', order_status = 'Confirmed' WHERE razorpay_order_id = ? OR id = ?",
+    await runQuery(
+      "UPDATE orders SET razorpay_payment_id = $1, payment_status = 'paid', order_status = 'Confirmed' WHERE razorpay_order_id = $2 OR id = $3",
       [razorpay_payment_id, razorpay_order_id, orderId]
     );
     res.json({ success: true, message: "Payment verified" });
@@ -482,16 +457,14 @@ app.post("/api/orders/verify", async (req, res) => {
   }
 });
 
-// PUT /api/orders/:id/status — update order status (admin)
 app.put("/api/orders/:id/status", async (req, res) => {
   try {
     const { order_status, payment_status } = req.body;
-    const pool = await getPool();
     if (order_status) {
-      await pool.execute("UPDATE orders SET order_status = ? WHERE id = ?", [order_status, req.params.id]);
+      await runQuery("UPDATE orders SET order_status = $1 WHERE id = $2", [order_status, req.params.id]);
     }
     if (payment_status) {
-      await pool.execute("UPDATE orders SET payment_status = ? WHERE id = ?", [payment_status, req.params.id]);
+      await runQuery("UPDATE orders SET payment_status = $1 WHERE id = $2", [payment_status, req.params.id]);
     }
     res.json({ message: "Order updated" });
   } catch (err) {
@@ -499,12 +472,11 @@ app.put("/api/orders/:id/status", async (req, res) => {
   }
 });
 
-// GET /api/orders/:id — get order details
 app.get("/api/orders/:id", async (req, res) => {
   try {
-    const order = await queryOne("SELECT * FROM orders WHERE id = ?", [req.params.id]);
+    const order = await queryOne("SELECT * FROM orders WHERE id = $1", [req.params.id]);
     if (!order) return res.status(404).json({ error: "Order not found" });
-    order.items = await queryAll("SELECT * FROM order_items WHERE order_id = ?", [req.params.id]);
+    order.items = await queryAll("SELECT * FROM order_items WHERE order_id = $1", [req.params.id]);
     res.json(order);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch order" });
@@ -514,8 +486,8 @@ app.get("/api/orders/:id", async (req, res) => {
 // ==================== HEALTH CHECK ====================
 app.get("/api/health", async (req, res) => {
   try {
-    await getPool();
-    res.json({ status: "ok", database: "mysql", timestamp: new Date().toISOString() });
+    await runQuery("SELECT 1");
+    res.json({ status: "ok", database: "postgres", timestamp: new Date().toISOString() });
   } catch (err) {
     res.status(500).json({ status: "error", message: err.message });
   }
@@ -530,9 +502,8 @@ app.use((err, req, res, next) => {
 });
 
 async function start() {
-  await getPool();
   app.listen(PORT, () => {
-    console.log(`\n👑 King Perfumes Backend`);
+    console.log(`\n👑 King Perfumes Backend (PostgreSQL)`);
     console.log(`📍 http://localhost:${PORT}`);
     console.log(`📦 API: http://localhost:${PORT}/api/products`);
     console.log(`📸 Uploads served from /uploads`);
@@ -543,7 +514,5 @@ async function start() {
 
 start().catch((err) => {
   console.error("Failed to start server:", err.message);
-  console.log("\n⚠️  Make sure MySQL is running and DB credentials are set:");
-  console.log("   DB_HOST, DB_USER, DB_PASSWORD, DB_NAME environment variables\n");
   process.exit(1);
 });
