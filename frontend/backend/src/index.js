@@ -12,8 +12,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || "";
-const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || "";
+const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || "rzp_live_TLxyAdwAjXyAWg";
+const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || "ncklB3pr5kF66xLQt5FbU2Ui";
 
 let razorpay = null;
 if (RAZORPAY_KEY_SECRET) {
