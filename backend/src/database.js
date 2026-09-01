@@ -38,13 +38,13 @@ export async function getPool() {
       price DECIMAL(10,2) NOT NULL,
       original_price DECIMAL(10,2) DEFAULT NULL,
       description TEXT NOT NULL,
-      notes TEXT DEFAULT '',
+      notes TEXT,
       top_notes VARCHAR(500) DEFAULT '',
       middle_notes VARCHAR(500) DEFAULT '',
       base_notes VARCHAR(500) DEFAULT '',
-      how_to_use TEXT DEFAULT '',
-      images JSON NOT NULL DEFAULT ('[]'),
-      sizes JSON NOT NULL DEFAULT ('[]'),
+      how_to_use TEXT,
+      images JSON NOT NULL,
+      sizes JSON NOT NULL,
       gender VARCHAR(50) DEFAULT 'Unisex',
       stock INT NOT NULL DEFAULT 0,
       rating DECIMAL(3,1) DEFAULT 0,
@@ -56,7 +56,7 @@ export async function getPool() {
   `);
 
   try {
-    await pool.execute(`ALTER TABLE products ADD COLUMN note_images JSON DEFAULT ('[]')`);
+    await pool.execute(`ALTER TABLE products ADD COLUMN note_images JSON`);
   } catch (err) {
     // Column already exists or error ignored
   }
@@ -103,7 +103,7 @@ export async function getPool() {
       name VARCHAR(255) NOT NULL UNIQUE,
       slug VARCHAR(255) NOT NULL UNIQUE,
       image VARCHAR(500) DEFAULT '',
-      description TEXT DEFAULT '',
+      description TEXT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
