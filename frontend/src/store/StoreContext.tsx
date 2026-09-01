@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
-const API_BASE = "http://localhost:3001/api";
+const API_BASE = "https://king-backend-nu.vercel.app/api";
 
 export type Product = {
   id: string;
