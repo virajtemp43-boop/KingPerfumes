@@ -21,7 +21,13 @@ if (RAZORPAY_KEY_SECRET) {
 }
 
 // Middleware
-app.use(cors({ origin: ["http://localhost:8080", "http://localhost:5173"], credentials: true }));
+app.use(cors({
+  origin: function(origin, callback) {
+    // Allow any origin for now (fixes Vercel and custom domains)
+    callback(null, true);
+  },
+  credentials: true
+}));
 app.use(express.json({ limit: "50mb" }));
 app.use("/uploads", express.static(path.resolve(__dirname, "../uploads")));
 
