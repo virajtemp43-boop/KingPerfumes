@@ -300,7 +300,14 @@ async function seedDatabase() {
   try {
     const pool = await getPool();
 
-    // Clear existing data
+    // Check if database is already seeded
+    const [existingProducts] = await pool.execute("SELECT COUNT(*) as count FROM products");
+    if (existingProducts[0].count > 0) {
+      console.log("Database already has products. Skipping seed to prevent data loss.");
+      process.exit(0);
+    }
+
+    // Clear existing data (just in case)
     await pool.execute("DELETE FROM products");
     await pool.execute("DELETE FROM categories");
     console.log("Cleared old products and categories.");
