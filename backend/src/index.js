@@ -6,6 +6,13 @@ import { fileURLToPath } from "url";
 import { v4 as uuid } from "uuid";
 import Razorpay from "razorpay";
 import { getPool, queryAll, queryOne, runQuery } from "./database.js";
+import { v2 as cloudinary } from "cloudinary";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || "tilcnxjb",
+  api_key: process.env.CLOUDINARY_API_KEY || "788495946164872",
+  api_secret: process.env.CLOUDINARY_API_SECRET || "6e2hkrDbyrFjLxAgRr61Nq_FlC8",
+});
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -31,14 +38,8 @@ app.use(cors({
 app.use(express.json({ limit: "50mb" }));
 app.use("/uploads", express.static(path.resolve(__dirname, "../uploads")));
 
-// File upload config
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, path.resolve(__dirname, "../uploads")),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `${uuid()}${ext}`);
-  },
-});
+// File upload config (Vercel-compatible memory storage)
+const storage = multer.memoryStorage();
 const upload = multer({
   storage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
@@ -176,17 +177,35 @@ app.delete("/api/products/:id", async (req, res) => {
 });
 
 // POST /api/upload — image upload
-app.post("/api/upload", upload.single("image"), (req, res) => {
+app.post("/api/upload", upload.single("image"), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No file uploaded" });
-  const url = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
-  res.json({ url, filename: req.file.filename });
+  try {
+    const b64 = Buffer.from(req.file.buffer).toString("base64");
+    const dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+    const result = await cloudinary.uploader.upload(dataURI, { resource_type: "auto" });
+    res.json({ url: result.secure_url, filename: result.public_id });
+  } catch (err) {
+    console.error("Cloudinary single upload error:", err);
+    res.status(500).json({ error: "Failed to upload to Cloudinary" });
+  }
 });
 
 // POST /api/upload/multiple — multiple image upload
-app.post("/api/upload/multiple", upload.array("images", 10), (req, res) => {
+app.post("/api/upload/multiple", upload.array("images", 10), async (req, res) => {
   if (!req.files || req.files.length === 0) return res.status(400).json({ error: "No files uploaded" });
-  const urls = req.files.map((f) => `${req.protocol}://${req.get("host")}/uploads/${f.filename}`);
-  res.json({ urls });
+  try {
+    const urls = [];
+    for (const file of req.files) {
+      const b64 = Buffer.from(file.buffer).toString("base64");
+      const dataURI = "data:" + file.mimetype + ";base64," + b64;
+      const result = await cloudinary.uploader.upload(dataURI, { resource_type: "auto" });
+      urls.push(result.secure_url);
+    }
+    res.json({ urls });
+  } catch (err) {
+    console.error("Cloudinary multiple upload error:", err);
+    res.status(500).json({ error: "Failed to upload to Cloudinary" });
+  }
 });
 
 // ==================== CATEGORIES API ====================
