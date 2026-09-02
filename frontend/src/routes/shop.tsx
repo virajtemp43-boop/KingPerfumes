@@ -27,7 +27,7 @@ function Shop() {
   const categories = useMemo(() => Array.from(new Set(products.map((p) => p.category))), [products]);
   const [category, setCategory] = useState<string | null>(null);
   const [gender, setGender] = useState<string>("All");
-  const [maxPrice, setMaxPrice] = useState(5000);
+  const [maxPrice, setMaxPrice] = useState(30000);
   const [minRating, setMinRating] = useState(0);
   const [sort, setSort] = useState("popular");
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -67,7 +67,7 @@ function Shop() {
       </FilterGroup>
 
       <FilterGroup title="Price">
-        <input type="range" min={500} max={5000} step={100} value={maxPrice} onChange={(e) => setMaxPrice(+e.target.value)} className="w-full accent-gold" />
+        <input type="range" min={500} max={30000} step={100} value={maxPrice} onChange={(e) => setMaxPrice(+e.target.value)} className="w-full accent-gold" />
         <div className="text-sm text-muted-foreground">Up to ₹{maxPrice}</div>
       </FilterGroup>
 
