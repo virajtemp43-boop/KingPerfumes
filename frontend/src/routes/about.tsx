@@ -15,7 +15,7 @@ export const Route = createFileRoute("/about")({
 
 function About() {
   return (
-    <div className="bg-background text-foreground selection:bg-gold selection:text-white pb-24">
+    <div className="text-foreground selection:bg-gold selection:text-white pb-24">
       {/* Hero Section */}
       <section className="relative min-h-[75vh] w-full flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">

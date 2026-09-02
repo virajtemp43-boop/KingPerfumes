@@ -62,7 +62,7 @@ const posts = [
 
 function Blog() {
   return (
-    <div className="bg-background min-h-screen pb-24">
+    <div className="min-h-screen pb-24">
       {/* Header */}
       <section className="pt-32 pb-16 bg-card border-b border-border/50">
         <div className="mx-auto max-w-4xl px-6 text-center">
