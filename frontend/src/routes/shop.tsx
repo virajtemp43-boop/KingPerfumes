@@ -90,8 +90,8 @@ function Shop() {
         <p className="mt-3 text-muted-foreground">Discover your signature scent from our curated collection.</p>
       </header>
 
-      <div className="grid gap-10 md:grid-cols-[240px_1fr]">
-        <aside className="hidden md:block">{filtersUI}</aside>
+      <div className="grid gap-10 md:grid-cols-[240px_1fr] relative">
+        <aside className="hidden md:block sticky top-32 self-start max-h-[calc(100vh-9rem)] overflow-y-auto pr-4 custom-scrollbar">{filtersUI}</aside>
 
         <div>
           <div className="mb-6 flex items-center justify-between gap-3">
