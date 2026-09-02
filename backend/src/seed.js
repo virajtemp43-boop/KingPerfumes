@@ -324,14 +324,21 @@ async function seedDatabase() {
     // Insert Products
     for (const prod of seedProducts) {
       const id = uuidv4();
+      
+      const sampleReviews = [
+        { id: uuidv4(), author: "Aarav S.", rating: 5, text: "Absolutely incredible fragrance. Lasts all day long and I get so many compliments!" },
+        { id: uuidv4(), author: "Priya M.", rating: 4, text: "Very luxurious and premium packaging. The scent is slightly strong at first but settles beautifully." },
+        { id: uuidv4(), author: "Vikram R.", rating: 5, text: "A masterpiece. This has become my new signature scent. Highly recommended." }
+      ];
+
       await pool.execute(
         `INSERT INTO products (
           id, name, slug, category, price, original_price, description, notes,
-          top_notes, middle_notes, base_notes, how_to_use, images, sizes, gender, stock, rating, review_count, badge
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          top_notes, middle_notes, base_notes, how_to_use, images, sizes, gender, stock, rating, review_count, badge, reviews
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           id, prod.name, prod.slug, prod.category, prod.price, prod.original_price, prod.description, prod.notes,
-          prod.top_notes, prod.middle_notes, prod.base_notes, prod.how_to_use, prod.images, prod.sizes, prod.gender, prod.stock, prod.rating, prod.review_count, prod.badge
+          prod.top_notes, prod.middle_notes, prod.base_notes, prod.how_to_use, prod.images, prod.sizes, prod.gender, prod.stock, prod.rating, prod.review_count, prod.badge, JSON.stringify(sampleReviews)
         ]
       );
     }
