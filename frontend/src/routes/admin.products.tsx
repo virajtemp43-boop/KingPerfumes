@@ -9,13 +9,13 @@ export const Route = createFileRoute("/admin/products")({
 });
 
 type SizeOption = { size: string; price: number };
-type FormState = Omit<Product, "id" | "rating" | "reviewCount"> & { rating?: number; reviewCount?: number; sizes: SizeOption[] };
+type FormState = Omit<Product, "id" | "rating" | "reviewCount"> & { rating?: number; reviewCount?: number; sizes: SizeOption[]; reviews: { id?: string; rating: number; text: string; author: string }[] };
 
 const empty: FormState = {
   name: "", slug: "", category: "", price: 0, originalPrice: undefined,
   description: "", notes: "", topNotes: "", middleNotes: "", baseNotes: "", howToUse: "",
   images: [""], sizes: [{ size: "50ml", price: 0 }], gender: "Unisex", stock: 0, badge: undefined, status: "active",
-  rating: 4.5, reviewCount: 0,
+  rating: 4.5, reviewCount: 0, reviews: [],
 };
 
 function AdminProducts() {
@@ -118,8 +118,9 @@ function AdminProducts() {
               ...data,
               price: minPrice, // Set the product price to the lowest size price
               sizes: data.sizes,
-              rating: data.rating ?? 4.5,
-              reviewCount: data.reviewCount ?? 0,
+              reviews: data.reviews,
+              reviewCount: data.reviews.length,
+              rating: data.reviews.length > 0 ? (data.reviews.reduce((acc, r) => acc + Number(r.rating), 0) / data.reviews.length).toFixed(1) : 4.5,
             };
             if (editing) {
               await updateProduct(editing.id, productData as any);
@@ -157,6 +158,7 @@ function convertProductToForm(p: Product): FormState {
         originalPrice: undefined, // Remove originalPrice
         rating: p.rating,
         reviewCount: p.reviewCount,
+        reviews: p.reviews || [],
       };
     }
     // Old format - convert
@@ -170,6 +172,7 @@ function convertProductToForm(p: Product): FormState {
     originalPrice: undefined, // Remove originalPrice
     rating: p.rating,
     reviewCount: p.reviewCount,
+    reviews: p.reviews || [],
   };
 }
 
@@ -229,6 +232,14 @@ function ProductForm({ initial, categories, onClose, onSubmit }: { initial: Form
     update("noteImages", list);
   };
   const removeNoteImage = (i: number) => update("noteImages", (form.noteImages || []).filter((_, idx) => idx !== i));
+
+  const addReview = () => update("reviews", [...(form.reviews || []), { id: Date.now().toString(), author: "Verified buyer", rating: 5, text: "" }]);
+  const updateReview = (i: number, field: "author" | "rating" | "text", val: string | number) => {
+    const list = [...(form.reviews || [])];
+    (list[i] as any)[field] = val;
+    update("reviews", list);
+  };
+  const removeReview = (i: number) => update("reviews", (form.reviews || []).filter((_, idx) => idx !== i));
 
 
   // Calculate lowest price from sizes for display
@@ -357,6 +368,29 @@ function ProductForm({ initial, categories, onClose, onSubmit }: { initial: Form
             <Field label="Base Notes" value={form.baseNotes} onChange={(v) => update("baseNotes", v)} />
           </div>
           <TextArea label="How to use" value={form.howToUse} onChange={(v) => update("howToUse", v)} />
+
+          {/* Reviews UI */}
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs uppercase tracking-wider text-muted-foreground">Customer Reviews</span>
+              <button type="button" onClick={addReview} className="text-xs text-gold hover:underline">+ Add Review</button>
+            </div>
+            <div className="mt-2 space-y-4">
+              {(form.reviews || []).map((r, i) => (
+                <div key={i} className="flex flex-col gap-2 p-4 border border-border bg-card rounded-lg relative">
+                  <button type="button" onClick={() => removeReview(i)} className="absolute top-2 right-2 p-1 text-destructive hover:bg-destructive/10 rounded">
+                    <X className="h-4 w-4" />
+                  </button>
+                  <div className="flex gap-2 pr-6">
+                    <input type="text" placeholder="Author (e.g. Verified Buyer)" value={r.author} onChange={(e) => updateReview(i, "author", e.target.value)} className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-gold" />
+                    <input type="number" min="1" max="5" placeholder="Rating (1-5)" value={r.rating} onChange={(e) => updateReview(i, "rating", +e.target.value)} className="w-24 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-gold" />
+                  </div>
+                  <textarea rows={2} placeholder="Review text..." value={r.text} onChange={(e) => updateReview(i, "text", e.target.value)} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-gold" />
+                </div>
+              ))}
+            </div>
+            <p className="mt-1 text-[10px] text-muted-foreground">Adding reviews will automatically update the product's average rating and total review count.</p>
+          </div>
 
           {/* Image Upload */}
           <div>

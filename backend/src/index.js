@@ -88,9 +88,16 @@ app.get("/api/products", async (req, res) => {
 
     const parsed = paged.map((prod) => ({
       ...prod,
+      originalPrice: prod.original_price,
+      topNotes: prod.top_notes,
+      middleNotes: prod.middle_notes,
+      baseNotes: prod.base_notes,
+      howToUse: prod.how_to_use,
+      reviewCount: prod.review_count,
       images: typeof prod.images === "string" ? JSON.parse(prod.images) : prod.images,
       sizes: typeof prod.sizes === "string" ? JSON.parse(prod.sizes) : prod.sizes,
       noteImages: typeof prod.note_images === "string" ? JSON.parse(prod.note_images) : (prod.note_images || []),
+      reviews: typeof prod.reviews === "string" ? JSON.parse(prod.reviews) : (prod.reviews || []),
     }));
 
     res.json({ products: parsed, total, page: p, totalPages: Math.ceil(total / lmt) });
@@ -105,9 +112,16 @@ app.get("/api/products/:slug", async (req, res) => {
   try {
     const product = await queryOne("SELECT * FROM products WHERE slug = ? OR id = ?", [req.params.slug, req.params.slug]);
     if (!product) return res.status(404).json({ error: "Product not found" });
+    product.originalPrice = product.original_price;
+    product.topNotes = product.top_notes;
+    product.middleNotes = product.middle_notes;
+    product.baseNotes = product.base_notes;
+    product.howToUse = product.how_to_use;
+    product.reviewCount = product.review_count;
     product.images = typeof product.images === "string" ? JSON.parse(product.images) : product.images;
     product.sizes = typeof product.sizes === "string" ? JSON.parse(product.sizes) : product.sizes;
     product.noteImages = typeof product.note_images === "string" ? JSON.parse(product.note_images) : (product.note_images || []);
+    product.reviews = typeof product.reviews === "string" ? JSON.parse(product.reviews) : (product.reviews || []);
     res.json(product);
   } catch (err) {
     console.error("Product fetch error:", err);
@@ -127,12 +141,12 @@ app.post("/api/products", async (req, res) => {
     const sizesJson = typeof sizes === "string" ? sizes : JSON.stringify(sizes);
     
     await pool.execute(
-      `INSERT INTO products (id, name, slug, category, price, original_price, description, notes, top_notes, middle_notes, base_notes, how_to_use, images, sizes, gender, stock, rating, review_count, badge, status, note_images)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO products (id, name, slug, category, price, original_price, description, notes, top_notes, middle_notes, base_notes, how_to_use, images, sizes, gender, stock, rating, review_count, badge, status, note_images, reviews)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [id, product.name, product.slug, product.category, product.price, product.originalPrice || null, product.description,
        product.notes || "", product.topNotes || "", product.middleNotes || "", product.baseNotes || "", product.howToUse || "",
        JSON.stringify(product.images || []), sizesJson, product.gender || "Unisex",
-       product.stock || 0, product.rating || 4.5, product.reviewCount || 0, product.badge || null, product.status || "active", JSON.stringify(product.noteImages || [])]
+       product.stock || 0, product.rating || 4.5, product.reviewCount || 0, product.badge || null, product.status || "active", JSON.stringify(product.noteImages || []), JSON.stringify(product.reviews || [])]
     );
     res.status(201).json({ id, message: "Product created" });
   } catch (err) {
@@ -153,10 +167,10 @@ app.put("/api/products/:id", async (req, res) => {
     const sizesJson = typeof sizes === "string" ? sizes : JSON.stringify(sizes);
     
     await pool.execute(
-      `UPDATE products SET name=?, slug=?, category=?, price=?, original_price=?, description=?, notes=?, top_notes=?, middle_notes=?, base_notes=?, how_to_use=?, images=?, sizes=?, gender=?, stock=?, rating=?, review_count=?, badge=?, status=?, note_images=? WHERE id=?`,
+      `UPDATE products SET name=?, slug=?, category=?, price=?, original_price=?, description=?, notes=?, top_notes=?, middle_notes=?, base_notes=?, how_to_use=?, images=?, sizes=?, gender=?, stock=?, rating=?, review_count=?, badge=?, status=?, note_images=?, reviews=? WHERE id=?`,
       [p.name, p.slug, p.category, p.price, p.originalPrice || null, p.description, p.notes || "", p.topNotes || "",
        p.middleNotes || "", p.baseNotes || "", p.howToUse || "", JSON.stringify(p.images || []), sizesJson,
-       p.gender || "Unisex", p.stock || 0, p.rating || 4.5, p.reviewCount || 0, p.badge || null, p.status || "active", JSON.stringify(p.noteImages || []), id]
+       p.gender || "Unisex", p.stock || 0, p.rating || 4.5, p.reviewCount || 0, p.badge || null, p.status || "active", JSON.stringify(p.noteImages || []), JSON.stringify(p.reviews || []), id]
     );
     res.json({ message: "Product updated" });
   } catch (err) {

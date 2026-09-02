@@ -61,6 +61,12 @@ export async function getPool() {
     // Column already exists or error ignored
   }
 
+  try {
+    await pool.execute(`ALTER TABLE products ADD COLUMN reviews JSON`);
+  } catch (err) {
+    // Column already exists or error ignored
+  }
+
   await pool.execute(`
     CREATE TABLE IF NOT EXISTS orders (
       id VARCHAR(100) PRIMARY KEY,

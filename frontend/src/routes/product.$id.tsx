@@ -229,15 +229,19 @@ function ProductDetail() {
           </TabsContent>
           <TabsContent value="reviews" className="mt-6 max-w-3xl">
             <div className="space-y-6">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="border-b border-border/60 pb-6">
-                  <div className="flex gap-0.5 text-gold">
-                    {Array.from({ length: 5 }).map((_, k) => <Star key={k} className="h-4 w-4 fill-current" />)}
+              {product.reviews && product.reviews.length > 0 ? (
+                product.reviews.map((r: any, i: number) => (
+                  <div key={i} className="border-b border-border/60 pb-6">
+                    <div className="flex gap-0.5 text-gold">
+                      {Array.from({ length: 5 }).map((_, k) => <Star key={k} className={`h-4 w-4 ${k < Number(r.rating) ? "fill-current" : ""}`} />)}
+                    </div>
+                    <p className="mt-2 font-serif text-lg text-foreground">"{r.text}"</p>
+                    <div className="mt-2 text-sm text-muted-foreground">— {r.author}</div>
                   </div>
-                  <p className="mt-2 font-serif text-lg text-foreground">"A magnificent fragrance that turns heads wherever I go."</p>
-                  <div className="mt-2 text-sm text-muted-foreground">— Verified buyer</div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <div className="text-muted-foreground italic">No reviews yet for this fragrance.</div>
+              )}
             </div>
           </TabsContent>
         </Tabs>

@@ -25,6 +25,7 @@ export type Product = {
   badge?: "Best Seller" | "New" | "Featured";
   status: string;
   noteImages?: { name: string; url: string }[];
+  reviews?: { id?: string; rating: number; text: string; author: string }[];
 };
 
 export type CartItem = { productId: string; size: string; quantity: number };
